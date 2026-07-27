@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,6 @@
       <a href="#" data-page="planning">🍅 规划</a>
       <a href="#" data-page="resources">🍡 资源</a>
       <a href="#" data-page="minimalist" class="minimalist-nav">🧹 极简生活</a>
-      <!-- ===== 数据备份按钮 ===== -->
       <span style="display:flex;gap:0.3rem;margin-left:auto;">
         <button class="small secondary" onclick="exportAllData()" style="font-size:0.75rem;padding:0.3rem 0.7rem;background:#A8D5A8;color:#fff;border:none;">💾 备份</button>
         <button class="small secondary" onclick="triggerImport()" style="font-size:0.75rem;padding:0.3rem 0.7rem;background:#F0C8A0;color:#fff;border:none;">📂 恢复</button>
@@ -53,7 +52,7 @@
         <div style="margin-top:0.5rem;font-size:0.85rem;color:var(--text-muted);">点击日期查看/添加事件</div>
       </div>
 
-      <!-- ===== 年度可用时间倒计时卡片 ===== -->
+      <!-- ===== 年度可用时间倒计时 ===== -->
       <div class="card" id="yearlyTimeContainer"></div>
 
       <!-- ===== 周计划 & 年计划 ===== -->
@@ -63,30 +62,29 @@
           <div id="weekPlanChart" style="height:120px;"></div>
         </div>
         <div class="card" id="yearPlanContainer">
-          <h3>📆 年度时间分配（每月）</h3>
+          <h3>📆 年度时间分配</h3>
           <div id="yearPlanChart" style="height:120px;"></div>
         </div>
       </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="flex-between">
-            <h3>📮 今日打卡</h3>
-            <span id="todayCount">0 项</span>
-          </div>
-          <div style="margin-bottom:0.8rem;">
-            <button class="small" onclick="showAddTodayTaskModal()" style="background:var(--primary);">➕ 添加今日任务</button>
-          </div>
-          <div id="todayTasksContainer"></div>
+      <!-- ===== 今日时间块 ===== -->
+      <div class="card" style="margin-top:1rem;">
+        <div class="flex-between">
+          <h3>⏰ 今日时间块</h3>
+          <span id="todayCount">0 块</span>
         </div>
-        <div class="card snapshot">
-          <h4>今日完成率</h4>
-          <div class="big-number" id="todayCompletion">0%</div>
-          <div style="color: var(--text-muted);">已完成 <span id="doneCount">0</span>h / 总 <span id="totalCount">0</span>h</div>
-        </div>
+        <div id="todayTimeBlocks"></div>
       </div>
 
-      <div class="card">
+      <!-- ===== 快照（完成率） ===== -->
+      <div class="card snapshot" style="margin-top:1rem;">
+        <h4>今日完成率</h4>
+        <div class="big-number" id="todayCompletion">0%</div>
+        <div style="color: var(--text-muted);">已完成 <span id="doneCount">0</span>h / 总 <span id="totalCount">0</span>h</div>
+      </div>
+
+      <!-- ===== 领域概览 ===== -->
+      <div class="card" style="margin-top:1rem;">
         <div class="flex-between">
           <h3>🌶 领域概览</h3>
           <span style="color: var(--text-muted);">点击领域可进入规划调整</span>
@@ -99,7 +97,10 @@
     <div id="page-planning" class="page">
       <div class="flex-between mb-1">
         <h2>🍅 规划 · 领域与项目</h2>
-        <button onclick="showNewAreaModal()">➕ 新建领域</button>
+        <div>
+          <button class="small secondary" onclick="showNewAreaModal()">➕ 新建领域</button>
+          <button class="small secondary" onclick="showEditTemplateModal()">📝 时间模板</button>
+        </div>
       </div>
       <div id="planningDailySummary" class="planning-daily-summary card"></div>
       <div id="planningContainer" class="planning-area"></div>
@@ -121,7 +122,6 @@
 
     <!-- ===== 极简生活页面 ===== -->
     <div id="page-minimalist" class="page">
-      <!-- 顶部统计 -->
       <div class="minimalist-stats">
         <div class="stat-card">
           <div class="stat-number" id="totalItems">0</div>
@@ -141,9 +141,7 @@
         </div>
       </div>
 
-      <!-- 四个核心功能 -->
       <div class="minimalist-grid">
-        <!-- 储蓄账户 -->
         <div class="minimalist-card" id="savingsAccountSection">
           <div class="card-header" style="flex-wrap:wrap;">
             <h3>🍞 储蓄账户</h3>
@@ -159,7 +157,6 @@
           </div>
         </div>
 
-        <!-- 消费追踪 -->
         <div class="minimalist-card">
           <div class="card-header" style="flex-wrap:wrap;">
             <h3>💳 消费追踪</h3>
@@ -173,7 +170,6 @@
           </div>
         </div>
 
-        <!-- 物品清单 -->
         <div class="minimalist-card full-width">
           <div class="card-header">
             <h3>📦 物品清单</h3>
@@ -185,7 +181,6 @@
           <div id="itemList" class="item-list"></div>
         </div>
 
-        <!-- 极简宣言 -->
         <div class="minimalist-card full-width">
           <div class="card-header">
             <h3>📜 极简宣言</h3>

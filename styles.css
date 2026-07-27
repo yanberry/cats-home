@@ -368,7 +368,111 @@ textarea {
   flex-wrap: wrap;
 }
 
-/* ===== 今日任务 ===== */
+/* ===== 时间块 ===== */
+.timeblocks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.timeblocks-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1;
+}
+.timeblocks-progress .progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.timeblocks-progress .progress-bar div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+.timeblocks-list {
+  display: grid;
+  gap: 0.4rem;
+}
+.timeblock-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: #FBF8FB;
+  border-left: 4px solid var(--primary);
+  transition: var(--transition);
+}
+.timeblock-item:hover {
+  background: var(--primary-soft);
+}
+.timeblock-item.done {
+  opacity: 0.6;
+}
+.timeblock-item.done .timeblock-name {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+.timeblock-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 80px;
+}
+.timeblock-content {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.timeblock-icon {
+  font-size: 0.9rem;
+}
+.timeblock-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.timeblock-task {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.timeblock-tag {
+  font-size: 0.65rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--primary-soft);
+  color: var(--text-muted);
+}
+.timeblock-hours {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.timeblock-actions {
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+}
+.timeblocks-footer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-light);
+}
+
+/* ===== 今日任务（旧版兼容） ===== */
 .task-group {
   margin-top: 0.8rem;
 }
@@ -1179,6 +1283,41 @@ textarea {
   background: var(--primary-light);
 }
 
+/* ===== 按钮组 ===== */
+.btn-group {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-light);
+}
+.btn-group:has(button:only-child) {
+  justify-content: center;
+}
+.btn-group:has(button:only-child) button {
+  min-width: 140px;
+}
+.btn-income {
+  background: var(--success) !important;
+  color: #fff !important;
+  border: none !important;
+}
+.btn-income:hover {
+  background: #8EC88E !important;
+  transform: translateY(-2px);
+}
+.btn-expense {
+  background: #C07070 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.btn-expense:hover {
+  background: #B06060 !important;
+  transform: translateY(-2px);
+}
+
 /* ===== 响应式 ===== */
 @media (max-width: 900px) {
   .grid-2 {
@@ -1221,6 +1360,13 @@ textarea {
   .banner::before {
     display: none;
   }
+  .timeblock-item {
+    flex-wrap: wrap;
+  }
+  .timeblock-time {
+    min-width: auto;
+    font-size: 0.7rem;
+  }
 }
 @media (max-width: 480px) {
   body { padding: 0.5rem; }
@@ -1231,6 +1377,7 @@ textarea {
   }
   .stat-number { font-size: 1.4rem; }
 }
+
 /* ===== 储蓄 & 消费卡片等高 ===== */
 .minimalist-grid {
   align-items: stretch;
@@ -1253,155 +1400,24 @@ textarea {
 .minimalist-grid .minimalist-card .expense-list .expense-monthly-table {
   flex: 1;
 }
-
-/* ===== 储蓄账户中的交易列表 ===== */
-.account-transactions {
-  max-height: 120px;
-  overflow-y: auto;
-  font-size: 0.82rem;
-}
-.account-transactions .txn-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.2rem 0;
-  border-bottom: 1px solid var(--border-light);
-}
-/* 图表容器高度增大 */
 .savings-chart-container,
 .expense-chart-container {
   min-height: 200px;
 }
 
-/* 两个按钮并排 */
-.minimalist-card .flex-buttons {
-  display: flex;
-  gap: 0.6rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-/* ===== 统一按钮组样式 ===== */
-.btn-group {
-  display: flex;
-  gap: 0.6rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border-light);
-}
-
-.btn-income {
-  background: var(--success) !important;
-  color: #fff !important;
-  border: none !important;
-}
-.btn-income:hover {
-  background: #8EC88E !important;
-  transform: translateY(-2px);
-}
-
-.btn-expense {
-  background: #C07070 !important;
-  color: #fff !important;
-  border: none !important;
-}
-.btn-expense:hover {
-  background: #B06060 !important;
-  transform: translateY(-2px);
-}
-/* ===== 单按钮组样式 ===== */
-.btn-group {
-  display: flex;
-  gap: 0.6rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border-light);
-}
-
-/* 如果只有一个按钮，让它居中且不拉伸 */
-.btn-group:has(button:only-child) {
-  justify-content: center;
-}
-.btn-group:has(button:only-child) button {
-  min-width: 140px;
-}
-
-.btn-income {
-  background: var(--success) !important;
-  color: #fff !important;
-  border: none !important;
-}
-.btn-income:hover {
-  background: #8EC88E !important;
-  transform: translateY(-2px);
-}
-
-.btn-expense {
-  background: #C07070 !important;
-  color: #fff !important;
-  border: none !important;
-}
-.btn-expense:hover {
-  background: #B06060 !important;
-  transform: translateY(-2px);
-}
-/* ===== 单按钮组样式 ===== */
-.btn-group {
-  display: flex;
-  gap: 0.6rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border-light);
-}
-
-/* 只有一个按钮时让它显眼一些 */
-.btn-group:has(button:only-child) {
-  justify-content: center;
-}
-.btn-group:has(button:only-child) button {
-  min-width: 140px;
-}
-
-.btn-income {
-  background: var(--success) !important;
-  color: #fff !important;
-  border: none !important;
-}
-.btn-income:hover {
-  background: #8EC88E !important;
-  transform: translateY(-2px);
-}
-
-.btn-expense {
-  background: #C07070 !important;
-  color: #fff !important;
-  border: none !important;
-}
-.btn-expense:hover {
-  background: #B06060 !important;
-  transform: translateY(-2px);
-}
-/* ===== 储蓄账户 & 消费追踪 固定高度 ===== */
+/* ===== 固定高度 ===== */
 .minimalist-grid .minimalist-card#savingsAccountSection,
 .minimalist-grid .minimalist-card:nth-child(2) {
   height: 400px;
   flex-shrink: 0;
   overflow: hidden;
 }
-
-/* 内部列表区域自动撑满剩余空间并滚动 */
 .minimalist-grid .minimalist-card#savingsAccountSection .savings-account-list,
 .minimalist-grid .minimalist-card:nth-child(2) .expense-list {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
 }
-
-/* 图表容器高度自适应 */
 .minimalist-grid .minimalist-card#savingsAccountSection .savings-chart-container,
 .minimalist-grid .minimalist-card:nth-child(2) .expense-chart-container {
   flex-shrink: 0;

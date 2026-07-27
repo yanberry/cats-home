@@ -1,0 +1,207 @@
+﻿﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+  <title>🌙 猫猫女巫的安全屋 ✦</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- ===== 导航栏 ===== -->
+    <nav class="nav-bar">
+      <a href="#" data-page="dashboard" class="active">🍩 仪表盘</a>
+      <a href="#" data-page="planning">🍅 规划</a>
+      <a href="#" data-page="resources">🍡 资源</a>
+      <a href="#" data-page="minimalist" class="minimalist-nav">🧹 极简生活</a>
+      <!-- ===== 数据备份按钮 ===== -->
+      <span style="display:flex;gap:0.3rem;margin-left:auto;">
+        <button class="small secondary" onclick="exportAllData()" style="font-size:0.75rem;padding:0.3rem 0.7rem;background:#A8D5A8;color:#fff;border:none;">💾 备份</button>
+        <button class="small secondary" onclick="triggerImport()" style="font-size:0.75rem;padding:0.3rem 0.7rem;background:#F0C8A0;color:#fff;border:none;">📂 恢复</button>
+      </span>
+    </nav>
+
+    <!-- ===== 仪表盘页面 ===== -->
+    <div id="page-dashboard" class="page active">
+      <div class="banner" id="bannerArea">
+        <div class="theme" id="themeDisplay">
+          <span class="emoji-deco">🌟</span> 猫猫女巫的安全屋 <span class="emoji-deco">🐈‍⬛</span>
+        </div>
+        <div class="areas-stars" id="starsContainer"></div>
+        <button class="small secondary" onclick="editBanner()">✏️ 编辑主题</button>
+      </div>
+
+      <div class="card inbox-area">
+        <div class="inbox-input-row">
+          <input id="inboxInput" placeholder="🐈‍⬛ 突然想到什么？先扔进来，稍后整理..." />
+          <button onclick="addInbox()">📜 存入</button>
+        </div>
+        <div class="inbox-list" id="inboxList"></div>
+      </div>
+
+      <!-- ===== 日历区域 ===== -->
+      <div class="card" style="margin-bottom:1.2rem;">
+        <div class="flex-between">
+          <h3>📅 日历</h3>
+          <div>
+            <button class="small secondary" onclick="changeMonth(-1)">◀</button>
+            <span id="calendarMonthYear" style="font-weight:700;margin:0 0.5rem;"></span>
+            <button class="small secondary" onclick="changeMonth(1)">▶</button>
+          </div>
+        </div>
+        <div id="calendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.3rem;margin-top:0.5rem;"></div>
+        <div style="margin-top:0.5rem;font-size:0.85rem;color:var(--text-muted);">点击日期查看/添加事件</div>
+      </div>
+
+      <!-- ===== 年度可用时间倒计时卡片 ===== -->
+      <div class="card" id="yearlyTimeContainer"></div>
+
+      <!-- ===== 周计划 & 年计划 ===== -->
+      <div class="grid-2" style="margin-top:1rem;">
+        <div class="card" id="weekPlanContainer">
+          <h3>📅 本周时间分配</h3>
+          <div id="weekPlanChart" style="height:120px;"></div>
+        </div>
+        <div class="card" id="yearPlanContainer">
+          <h3>📆 年度时间分配（每月）</h3>
+          <div id="yearPlanChart" style="height:120px;"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="flex-between">
+            <h3>📮 今日打卡</h3>
+            <span id="todayCount">0 项</span>
+          </div>
+          <div style="margin-bottom:0.8rem;">
+            <button class="small" onclick="showAddTodayTaskModal()" style="background:var(--primary);">➕ 添加今日任务</button>
+          </div>
+          <div id="todayTasksContainer"></div>
+        </div>
+        <div class="card snapshot">
+          <h4>今日完成率</h4>
+          <div class="big-number" id="todayCompletion">0%</div>
+          <div style="color: var(--text-muted);">已完成 <span id="doneCount">0</span>h / 总 <span id="totalCount">0</span>h</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex-between">
+          <h3>🌶 领域概览</h3>
+          <span style="color: var(--text-muted);">点击领域可进入规划调整</span>
+        </div>
+        <div class="area-cards" id="areaOverview"></div>
+      </div>
+    </div>
+
+    <!-- ===== 规划页面 ===== -->
+    <div id="page-planning" class="page">
+      <div class="flex-between mb-1">
+        <h2>🍅 规划 · 领域与项目</h2>
+        <button onclick="showNewAreaModal()">➕ 新建领域</button>
+      </div>
+      <div id="planningDailySummary" class="planning-daily-summary card"></div>
+      <div id="planningContainer" class="planning-area"></div>
+    </div>
+
+    <!-- ===== 资源页面 ===== -->
+    <div id="page-resources" class="page">
+      <div class="flex-between mb-1">
+        <h2>🍡 资源库</h2>
+        <button onclick="showNewResourceModal()">➕ 新建资源</button>
+      </div>
+      <div class="resource-filters">
+        <select id="filterArea"></select>
+        <select id="filterProject"></select>
+        <input id="filterSearch" placeholder="🔍 搜索标题 / 内容..." oninput="renderResources()" />
+      </div>
+      <div id="resourceGrid" class="resource-grid"></div>
+    </div>
+
+    <!-- ===== 极简生活页面 ===== -->
+    <div id="page-minimalist" class="page">
+      <!-- 顶部统计 -->
+      <div class="minimalist-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="totalItems">0</div>
+          <div class="stat-label">📦 总物品数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="monthExpenses">¥0</div>
+          <div class="stat-label">💳 本月支出</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalSavingsDisplay">¥0</div>
+          <div class="stat-label">🏦 总储蓄</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="declutterCount">0</div>
+          <div class="stat-label">🗑️ 已清理物品</div>
+        </div>
+      </div>
+
+      <!-- 四个核心功能 -->
+      <div class="minimalist-grid">
+        <!-- 储蓄账户 -->
+        <div class="minimalist-card" id="savingsAccountSection">
+          <div class="card-header" style="flex-wrap:wrap;">
+            <h3>🍞 储蓄账户</h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+              <select id="savingsAccountSelect" onchange="renderSavingsAccounts()" style="width:auto;padding:0.3rem 0.8rem;font-size:0.85rem;"></select>
+              <select id="savingsYearSelect" onchange="renderSavingsAccounts()" style="width:auto;padding:0.3rem 0.8rem;font-size:0.85rem;"></select>
+              <button onclick="showAddAccountModal()" style="background:var(--primary);padding:0.2rem 0.8rem;font-size:0.8rem;">+</button>
+            </div>
+          </div>
+          <div id="savingsAccountList" class="savings-account-list"></div>
+          <div class="btn-group">
+            <button class="small btn-income" onclick="showAddTransactionModal('income')">📈 记录收入</button>
+          </div>
+        </div>
+
+        <!-- 消费追踪 -->
+        <div class="minimalist-card">
+          <div class="card-header" style="flex-wrap:wrap;">
+            <h3>💳 消费追踪</h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+              <select id="expenseYearSelect" onchange="renderExpenses()" style="width:auto;padding:0.3rem 0.8rem;font-size:0.85rem;"></select>
+            </div>
+          </div>
+          <div id="expenseList" class="expense-list"></div>
+          <div class="btn-group">
+            <button class="small btn-expense" onclick="showAddTransactionModal('expense')">📉 记录支出</button>
+          </div>
+        </div>
+
+        <!-- 物品清单 -->
+        <div class="minimalist-card full-width">
+          <div class="card-header">
+            <h3>📦 物品清单</h3>
+            <div>
+              <button class="small secondary" onclick="showAddItemModal()">+ 添加</button>
+              <button class="small secondary" onclick="showDeclutteredItems()">📋 已清理</button>
+            </div>
+          </div>
+          <div id="itemList" class="item-list"></div>
+        </div>
+
+        <!-- 极简宣言 -->
+        <div class="minimalist-card full-width">
+          <div class="card-header">
+            <h3>📜 极简宣言</h3>
+            <button onclick="editManifesto()">✏️ 编辑</button>
+          </div>
+          <div id="manifestoDisplay" class="manifesto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 模态框 ===== -->
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

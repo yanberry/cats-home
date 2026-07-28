@@ -1,0 +1,88 @@
+{
+  "pair_time_templates": {
+    "工作日": [
+      {
+        "id": "b1",
+        "name": "深度工作",
+        "start": "05:00",
+        "end": "12:00",
+        "color": "#C4A0C4",
+        "icon": "⚡"
+      },
+      {
+        "id": "b_rest1",
+        "name": "午休",
+        "start": "12:00",
+        "end": "13:00",
+        "color": "#E8E0E8",
+        "icon": "😴"
+      },
+      {
+        "id": "b2",
+        "name": "项目工作",
+        "start": "13:00",
+        "end": "18:00",
+        "color": "#7EC8E3",
+        "icon": "💼"
+      },
+      {
+        "id": "b_rest2",
+        "name": "晚餐休息",
+        "start": "18:00",
+        "end": "19:00",
+        "color": "#E8E0E8",
+        "icon": "😴"
+      },
+      {
+        "id": "b3",
+        "name": "复盘充电",
+        "start": "19:00",
+        "end": "22:00",
+        "color": "#F0C8A0",
+        "icon": "🌙"
+      }
+    ],
+    "周末": [
+      {
+        "id": "b1",
+        "name": "深度工作",
+        "start": "05:00",
+        "end": "12:00",
+        "color": "#C4A0C4",
+        "icon": "⚡"
+      },
+      {
+        "id": "b_rest1",
+        "name": "午休",
+        "start": "12:00",
+        "end": "13:00",
+        "color": "#E8E0E8",
+        "icon": "😴"
+      },
+      {
+        "id": "b2",
+        "name": "兴趣学习",
+        "start": "13:00",
+        "end": "18:00",
+        "color": "#A8D5A8",
+        "icon": "🌿"
+      },
+      {
+        "id": "b_rest2",
+        "name": "晚餐休息",
+        "start": "18:00",
+        "end": "19:00",
+        "color": "#E8E0E8",
+        "icon": "😴"
+      },
+      {
+        "id": "b3",
+        "name": "休闲放松",
+        "start": "19:00",
+        "end": "22:00",
+        "color": "#E8D5E8",
+        "icon": "🎬"
+      }
+    ]
+  }
+}

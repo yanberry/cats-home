@@ -1422,3 +1422,172 @@ textarea {
 .minimalist-grid .minimalist-card:nth-child(2) .expense-chart-container {
   flex-shrink: 0;
 }
+/* 年度预算弹窗样式（若之前没有，请追加） */
+.budget-modal {
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: var(--radius);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.budget-modal h2 {
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+  flex-shrink: 0;
+}
+.budget-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background: var(--primary-soft);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.8rem;
+  flex-shrink: 0;
+}
+.budget-total label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.budget-stats {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.budget-task-list {
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 0.3rem;
+}
+.budget-task-item {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+.budget-table-wrapper {
+  overflow-x: auto;
+  flex: 1;
+}
+.budget-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 800px;
+}
+.budget-matrix th,
+.budget-matrix td {
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.25rem;
+  text-align: center;
+  vertical-align: middle;
+}
+.budget-matrix thead th {
+  background: var(--primary-soft);
+  color: var(--text);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.budget-matrix .budget-task-row td:first-child {
+  text-align: left;
+  padding-left: 0.5rem;
+  min-width: 120px;
+}
+.budget-task-name {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.2s;
+}
+.budget-task-name:hover {
+  border-bottom-color: var(--primary);
+}
+.budget-cell {
+  width: 50px;
+  padding: 0.15rem;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 0.85rem;
+}
+.budget-cell:focus {
+  outline: 2px solid var(--primary);
+  background: #fff;
+  border-radius: 4px;
+}
+.budget-quota {
+  width: 56px;
+  padding: 0.15rem;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
+.budget-summary-row td {
+  background: #F8F0F8;
+  font-weight: 600;
+}
+.budget-col-total td {
+  background: #F5F0F5;
+  font-weight: 600;
+}
+.budget-buffer td {
+  background: #FBF8FB;
+  font-weight: 500;
+}
+.budget-add-row td {
+  background: #FDFBFD;
+}
+.task-total {
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+.budget-modal .actions {
+  border-top: 1px solid var(--border-light);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+@media (max-width: 768px) {
+  .budget-modal {
+    padding: 1rem;
+  }
+  .budget-top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .budget-matrix {
+    font-size: 0.75rem;
+    min-width: 600px;
+  }
+  .budget-cell {
+    width: 36px;
+    padding: 0.1rem;
+    font-size: 0.75rem;
+  }
+  .budget-quota {
+    width: 40px;
+    font-size: 0.7rem;
+  }
+  .budget-task-item input[type="number"] {
+    width: 50px !important;
+  }
+}

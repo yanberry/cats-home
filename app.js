@@ -716,10 +716,10 @@ function showAddTimeBlockModal(targetDate) {
   }).join('');
   var html = '<h2>➕ 添加时间块</h2>' +
     '<div class="form-group"><label>日期</label><input id="newBlockDate" type="date" value="' + targetDate + '" /></div>' +
-    '<div class="form-group"><label>名称</label><input id="newBlockName" placeholder="例如：深度工作" /></div>' +
+    '<div class="form-group"><label>名称</label><input id="newBlockName" placeholder="" /></div>' +
     '<div class="form-group"><label>开始时间</label><input id="newBlockStart" type="time" value="06:30" /></div>' +
     '<div class="form-group"><label>结束时间</label><input id="newBlockEnd" type="time" value="08:00" /></div>' +
-    '<div class="form-group"><label>任务内容</label><input id="newBlockTask" placeholder="具体做什么" /></div>' +
+    '<div class="form-group"><label>任务内容</label><input id="newBlockTask" placeholder="" /></div>' +
     '<div class="form-group"><label>关联领域</label><select id="newBlockArea">' + areaOptions + '</select></div>' +
     '<div class="form-group"><label>关联项目</label><select id="newBlockProject" onchange="updateBudgetTasksSelect(\'new\')">' + projectOptions + '</select></div>' +
     '<div class="form-group"><label>关联事项（年度预算）</label><select id="newBlockTaskSelect"><option value="">无</option></select></div>' +
@@ -807,7 +807,7 @@ function quickAddTimeBlock() {
   }).join('');
   var html = '<h2>⚡ 快速添加时间块</h2>' +
     '<div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.8rem;">输入任务名称和预估时间，系统自动创建时间块</div>' +
-    '<div class="form-group"><label>任务名称</label><input id="quickTaskName" placeholder="例如：高数第三章习题" /></div>' +
+    '<div class="form-group"><label>任务名称</label><input id="quickTaskName" placeholder="" /></div>' +
     '<div class="form-group"><label>预估耗时（小时）</label><input id="quickTaskHours" type="number" step="0.5" value="1" placeholder="1.5" /></div>' +
     '<div class="form-group"><label>关联项目</label><select id="quickTaskProject" onchange="quickUpdateTasks()">' + projectOptions + '</select></div>' +
     '<div class="form-group"><label>关联事项</label><select id="quickTaskSelect"><option value="">无</option></select></div>' +
@@ -1865,7 +1865,7 @@ function getProject(id) { return loadProjects().find(function(p) { return p.id =
 function getResource(id) { return loadResources().find(function(r) { return r.id === id; }); }
 
 function showNewAreaModal() {
-  openModal('<h2>➕ 新建领域</h2><div class="form-group"><label>名称</label><input id="newAreaName" placeholder="例如：学习" /></div><div class="form-group"><label>图标</label><input id="newAreaIcon" placeholder="📉" value="🌟" /></div><div class="form-group"><label>星级</label><input id="newAreaStars" type="number" min="1" max="5" step="0.5" value="3" /></div><div class="form-group"><label>颜色</label><input id="newAreaColor" type="color" value="#C4A0C4" /></div><div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveNewArea()">创建</button></div>');
+  openModal('<h2>➕ 新建领域</h2><div class="form-group"><label>名称</label><input id="newAreaName" placeholder="" /></div><div class="form-group"><label>图标</label><input id="newAreaIcon" placeholder="📉" value="🌟" /></div><div class="form-group"><label>星级</label><input id="newAreaStars" type="number" min="1" max="5" step="0.5" value="3" /></div><div class="form-group"><label>颜色</label><input id="newAreaColor" type="color" value="#C4A0C4" /></div><div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveNewArea()">创建</button></div>');
 }
 function saveNewArea() {
   var name = document.getElementById('newAreaName').value.trim();
@@ -1925,7 +1925,7 @@ function showNewProjectModal(prefillTitle, prefillAreaId) {
   var areaOptions = areas.map(function(area) {
     return '<option value="' + area.id + '" ' + (area.id === prefillAreaId ? 'selected' : '') + '>' + area.name + '</option>';
   }).join('');
-  openModal('<h2>➕ 新建项目</h2><div class="form-group"><label>标题</label><input id="newProjTitle" value="' + escapeHtml(prefillTitle) + '" placeholder="例如：Q3 减脂计划" /></div><div class="form-group"><label>所属领域</label><select id="newProjArea">' + areaOptions + '</select></div><div class="form-group"><label>指标名称</label><input id="newProjMetric" placeholder="体重" /></div><div class="form-group"><label>目标值</label><input id="newProjTarget" type="number" placeholder="70" /></div><div class="form-group"><label>当前值</label><input id="newProjCurrent" type="number" placeholder="75" value="0" /></div><div class="form-group"><label>单位</label><input id="newProjUnit" placeholder="kg" /></div><div class="form-group"><label>开始日期</label><input id="newProjStart" type="date" value="' + today() + '" /></div><div class="form-group"><label>结束日期</label><input id="newProjEnd" type="date" /></div><div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveNewProject()">创建</button></div>');
+  openModal('<h2>➕ 新建项目</h2><div class="form-group"><label>标题</label><input id="newProjTitle" value="' + escapeHtml(prefillTitle) + '" placeholder="" /></div><div class="form-group"><label>所属领域</label><select id="newProjArea">' + areaOptions + '</select></div><div class="form-group"><label>指标</label><input id="newProjMetric" placeholder="" /></div><div class="form-group"><label>目标</label><input id="newProjTarget" type="number" placeholder="70" /></div><div class="form-group"><label>当前</label><input id="newProjCurrent" type="number" placeholder="75" value="0" /></div><div class="form-group"><label>单位</label><input id="newProjUnit" placeholder="kg" /></div><div class="form-group"><label>开始日期</label><input id="newProjStart" type="date" value="' + today() + '" /></div><div class="form-group"><label>结束日期</label><input id="newProjEnd" type="date" /></div><div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveNewProject()">创建</button></div>');
 }
 function saveNewProject() {
   var title = document.getElementById('newProjTitle').value.trim();
@@ -2868,7 +2868,7 @@ function showAddTransactionModal(type) {
     '<div class="form-group"><label>金额（元）</label><input id="txnAmount" type="number" step="0.01" placeholder="0.00" /></div>' +
     '<div class="form-group"><label>分类</label><select id="txnCategory">' + categoryOptions + '</select></div>' +
     '<div class="form-group"><label>日期</label><input id="txnDate" type="date" value="' + today() + '" /></div>' +
-    '<div class="form-group"><label>备注（可选）</label><input id="txnNote" placeholder="例如：超市购物" /></div>' +
+    '<div class="form-group"><label>备注（可选）</label><input id="txnNote" placeholder="" /></div>' +
     '<div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveTransaction(\'' + type + '\')">保存</button></div>');
 }
 function saveTransaction(type) {
@@ -3069,15 +3069,29 @@ function triggerImport() {
 // 初始化
 // ============================================================
 async function initialize() {
+  // 1. 先加载所有本地数据到 _dataCache
+  _dataCache = {};
+  for (var key in STORE) {
+    _dataCache[key] = load(key);
+  }
+
+  // 2. 尝试从服务器加载
   const serverData = await loadAllFromServer();
-  if (serverData) {
+  // 只有服务器返回了非空数据，才用服务器数据覆盖本地
+  if (serverData && Object.keys(serverData).length > 0) {
     for (var key in STORE) {
       if (serverData[key] !== undefined) {
         saveToLocal(key, serverData[key]);
+        _dataCache[key] = serverData[key];
       }
     }
-    _dataCache = serverData;
+  } else {
+    // 服务器无数据时，将本地数据推送到服务器（确保 data.json 完整）
+    console.log('📤 服务器无数据，推送本地数据...');
+    await saveAllToServer(_dataCache);
   }
+
+  // 3. 后续初始化（确保默认值、生成今日计划等）
   if (!loadData(STORE.banner)) {
     saveDataSync(STORE.banner, { year: new Date().getFullYear(), theme: '' });
   }
@@ -3092,6 +3106,7 @@ async function initialize() {
   if (!dailyPlans[todayStr]) {
     generateDailyPlan(todayStr);
   }
+  // 渲染等...
   renderBanner();
   renderInbox();
   renderTodayTimeBlocks();
@@ -3111,7 +3126,6 @@ async function initialize() {
     renderProjectBudgetOverview();
   }, 60000);
 }
-
 // ============================================================
 // 页面切换
 // ============================================================

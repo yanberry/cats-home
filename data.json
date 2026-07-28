@@ -1,4 +1,68 @@
 {
+  "pair_areas": [
+    {
+      "id": "ms47rsuj64h8",
+      "name": "学习",
+      "icon": "🌟",
+      "stars": 5,
+      "color": "#cb15cb"
+    }
+  ],
+  "pair_projects": [],
+  "pair_inbox": [],
+  "pair_resources": [],
+  "pair_logs": [],
+  "pair_banner": {
+    "year": 2026,
+    "theme": "猫猫女巫的安全屋🐈‍⬛"
+  },
+  "minimalist_items": [],
+  "minimalist_expenses_monthly": {},
+  "minimalist_manifesto": {
+    "content": ""
+  },
+  "pair_savings_accounts": [],
+  "pair_calendar_events": {},
+  "pair_user_settings": {
+    "wakeTime": "05:00",
+    "sleepTime": "22:00",
+    "dailyAvailable": 15,
+    "workDays": [
+      "周一",
+      "周二",
+      "周三",
+      "周四",
+      "周五"
+    ],
+    "weekendDays": [
+      "周六",
+      "周日"
+    ],
+    "restBlocks": [
+      {
+        "name": "午休",
+        "start": "12:00",
+        "end": "13:00"
+      },
+      {
+        "name": "晚餐休息",
+        "start": "18:00",
+        "end": "19:00"
+      }
+    ],
+    "routineBlocks": [
+      {
+        "name": "晨间仪式",
+        "start": "05:00",
+        "end": "05:30"
+      },
+      {
+        "name": "睡前准备",
+        "start": "21:30",
+        "end": "22:00"
+      }
+    ]
+  },
   "pair_time_templates": {
     "工作日": [
       {
@@ -84,5 +148,103 @@
         "icon": "🎬"
       }
     ]
-  }
+  },
+  "pair_daily_plans": {
+    "2026-07-28": {
+      "date": "2026-07-28",
+      "template": "工作日",
+      "blocks": [
+        {
+          "id": "ms45uzyev14v",
+          "name": "深度工作",
+          "start": "05:00",
+          "end": "12:00",
+          "hours": 7,
+          "color": "#C4A0C4",
+          "icon": "⚡",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-28",
+          "done": false,
+          "isRest": false,
+          "note": ""
+        },
+        {
+          "id": "ms45uzyey68n",
+          "name": "午休",
+          "start": "12:00",
+          "end": "13:00",
+          "hours": 1,
+          "color": "#E8E0E8",
+          "icon": "😴",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-28",
+          "done": false,
+          "isRest": true,
+          "note": ""
+        },
+        {
+          "id": "ms45uzyepifg",
+          "name": "项目工作",
+          "start": "13:00",
+          "end": "18:00",
+          "hours": 5,
+          "color": "#7EC8E3",
+          "icon": "💼",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-28",
+          "done": false,
+          "isRest": false,
+          "note": ""
+        },
+        {
+          "id": "ms45uzyefntf",
+          "name": "晚餐休息",
+          "start": "18:00",
+          "end": "19:00",
+          "hours": 1,
+          "color": "#E8E0E8",
+          "icon": "😴",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-28",
+          "done": false,
+          "isRest": true,
+          "note": ""
+        },
+        {
+          "id": "ms45uzyeeqmi",
+          "name": "复盘充电",
+          "start": "19:00",
+          "end": "22:00",
+          "hours": 3,
+          "color": "#F0C8A0",
+          "icon": "🌙",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-28",
+          "done": false,
+          "isRest": false,
+          "note": ""
+        }
+      ],
+      "totalHours": 17,
+      "completedHours": 0,
+      "status": "planned"
+    }
+  },
+  "pair_weekly_plans": {},
+  "pair_annual_goals": []
 }

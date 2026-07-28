@@ -28,13 +28,17 @@ function initDataFile() {
       minimalist_expenses_monthly: {},
       minimalist_manifesto: { content: '' },
       pair_savings_accounts: [],
-      pair_calendar_events: {}
+      pair_calendar_events: {},
+      pair_user_settings: null,   // 新加
+      pair_time_templates: null,  // 新加
+      pair_daily_plans: {},       // 新加
+      pair_weekly_plans: {},      // 新加
+      pair_annual_goals: []       // 新加
     };
     fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), 'utf8');
     console.log('✅ 已创建 data.json');
   }
 }
-
 // ===== 读取数据 =====
 function readData() {
   try {

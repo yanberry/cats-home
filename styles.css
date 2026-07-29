@@ -1592,6 +1592,110 @@ textarea {
   }
 }
 
+/* ===== 🍅 番茄钟 ===== */
+.today-view-tabs {
+  display: flex;
+  gap: 0.3rem;
+  background: var(--primary-soft);
+  padding: 0.25rem;
+  border-radius: var(--radius-full);
+}
+.today-view-tab {
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.today-view-tab:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.5);
+  transform: none;
+}
+.today-view-tab.active {
+  background: #fff;
+  color: var(--primary-dark);
+  box-shadow: 0 2px 8px rgba(196, 160, 196, 0.2);
+}
+
+.pomodoro-container {
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.pomodoro-mode-btns {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.pomodoro-mode-btns button {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+}
+.pomodoro-timer {
+  font-size: clamp(3.5rem, 10vw, 5.5rem);
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin: 0.5rem 0;
+}
+.pomodoro-task-row {
+  max-width: 420px;
+  margin: 0 auto;
+  width: 100%;
+}
+.pomodoro-task-row input {
+  text-align: center;
+  font-size: 1rem;
+}
+.pomodoro-selects {
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+.pomodoro-selects label {
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+.pomodoro-selects select {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+}
+.pomodoro-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.pomodoro-controls button {
+  padding: 0.55rem 1.4rem;
+  font-size: 0.95rem;
+}
+.pomodoro-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .pomodoro-selects {
+    grid-template-columns: 1fr !important;
+  }
+  .pomodoro-controls button {
+    flex: 1;
+    min-width: 100px;
+  }
+}
+
 /* ===== 📚 影音阅读模块 ===== */
 .media-nav {
   background: rgba(196, 160, 196, 0.1);

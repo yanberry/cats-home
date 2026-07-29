@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -78,13 +78,20 @@
         </div>
       </div>
 
-      <!-- ===== 今日时间块 ===== -->
+      <!-- ===== 今日时间块 / 番茄钟 ===== -->
       <div class="card" style="margin-top:1rem;">
         <div class="flex-between">
-          <h3>⏰ 今日时间块</h3>
-          <span id="todayCount">0 块</span>
+          <h3 id="todayViewTitle">⏰ 今日时间块</h3>
+          <div style="display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;">
+            <div class="today-view-tabs">
+              <button class="today-view-tab active" data-view="blocks" onclick="switchTodayView('blocks')">⏰ 时间块</button>
+              <button class="today-view-tab" data-view="pomodoro" onclick="switchTodayView('pomodoro')">🍅 番茄钟</button>
+            </div>
+            <span id="todayCount" style="font-size:0.85rem;color:var(--text-muted);white-space:nowrap;">0 块</span>
+          </div>
         </div>
         <div id="todayTimeBlocks"></div>
+        <div id="pomodoroView" style="display:none;"></div>
       </div>
 
       <!-- ===== 快照（完成率） ===== -->

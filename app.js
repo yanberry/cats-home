@@ -270,16 +270,13 @@ function renderMediaLibrary() {
   html += `<div class="media-grid">`;
   filtered.forEach(item => {
     const progress = item.total ? Math.round((item.progress || 0) / item.total * 100) : 0;
-    const statusEmoji = item.status === '✅ 已完成' ? '✅' :
-                         item.status === '🔄 进行中' ? '🔄' :
-                         item.status === '⏸️ 暂停' ? '⏸️' : '📖';
 
     html += `
       <div class="media-card" style="border-left-color: ${item.color || '#C4A0C4'};">
         <div class="media-header">
           <span class="media-type-tag">${item.type}</span>
           <span class="media-status-tag" style="background:${item.status === '✅ 已完成' ? 'var(--success-bg)' : item.status === '🔄 进行中' ? 'var(--warning-bg)' : 'var(--primary-soft)'};">
-            ${statusEmoji} ${item.status}
+            ${item.status}
           </span>
         </div>
         <div class="media-title">${escapeHtml(item.title)}</div>
@@ -878,11 +875,15 @@ function renderTodayTimeBlocks() {
   '</div>';
   
   container.innerHTML = html;
-  
-  document.getElementById('todayCompletion').textContent = totalHours > 0 ? Math.round(pct) + '%' : '0%';
-  document.getElementById('doneCount').textContent = completedHours.toFixed(1) + 'h';
-  document.getElementById('totalCount').textContent = totalHours.toFixed(1) + 'h';
-  document.getElementById('todayCount').textContent = plan.blocks.length + ' 块 · ' + completedHours.toFixed(1) + 'h / ' + totalHours.toFixed(1) + 'h';
+
+  var todayCompletionEl = document.getElementById('todayCompletion');
+  if (todayCompletionEl) todayCompletionEl.textContent = totalHours > 0 ? Math.round(pct) + '%' : '0%';
+  var doneCountEl = document.getElementById('doneCount');
+  if (doneCountEl) doneCountEl.textContent = completedHours.toFixed(1) + 'h';
+  var totalCountEl = document.getElementById('totalCount');
+  if (totalCountEl) totalCountEl.textContent = totalHours.toFixed(1) + 'h';
+  var todayCountEl = document.getElementById('todayCount');
+  if (todayCountEl) todayCountEl.textContent = plan.blocks.length + ' 块 · ' + completedHours.toFixed(1) + 'h / ' + totalHours.toFixed(1) + 'h';
 }
 
 // 完成时间块
@@ -1223,6 +1224,255 @@ function regenerateTodayPlan() {
   renderTodayTimeBlocks();
   renderYearlyTime();
   showToast('🔄 已重置今日计划');
+}
+
+// ============================================================
+// 🍅 番茄钟
+// ============================================================
+let pomodoroTimer = null;
+let pomodoroMode = 'countdown';
+let pomodoroTargetSeconds = 25 * 60;
+let pomodoroElapsedSeconds = 0;
+let pomodoroRunning = false;
+let pomodoroSessionStart = null;
+
+function switchTodayView(view) {
+  localStorage.setItem('pair_today_view', view);
+  renderTodayView();
+}
+
+function renderTodayView() {
+  var view = localStorage.getItem('pair_today_view') || 'blocks';
+  document.querySelectorAll('.today-view-tab').forEach(function(tab) {
+    tab.classList.toggle('active', tab.dataset.view === view);
+  });
+  var title = document.getElementById('todayViewTitle');
+  if (title) title.textContent = view === 'pomodoro' ? '🍅 番茄钟' : '⏰ 今日时间块';
+
+  var blocksContainer = document.getElementById('todayTimeBlocks');
+  var pomodoroContainer = document.getElementById('pomodoroView');
+  if (!blocksContainer || !pomodoroContainer) return;
+
+  if (view === 'pomodoro') {
+    blocksContainer.style.display = 'none';
+    pomodoroContainer.style.display = 'block';
+    renderPomodoroView();
+    renderTodayTimeBlocks();
+  } else {
+    blocksContainer.style.display = 'block';
+    pomodoroContainer.style.display = 'none';
+    renderTodayTimeBlocks();
+  }
+}
+
+function renderPomodoroView() {
+  var container = document.getElementById('pomodoroView');
+  if (!container) return;
+
+  var areas = loadAreas();
+  var projects = loadProjects();
+  var areaOptions = '<option value="">无</option>' + areas.map(function(a) {
+    return '<option value="' + a.id + '">' + a.icon + ' ' + a.name + '</option>';
+  }).join('');
+  var projectOptions = '<option value="">无</option>' + projects.map(function(p) {
+    return '<option value="' + p.id + '">' + escapeHtml(p.title) + '</option>';
+  }).join('');
+
+  var display = formatPomodoroTime(pomodoroElapsedSeconds);
+  var timerColor = pomodoroMode === 'countdown' ? 'var(--accent)' : 'var(--primary)';
+
+  container.innerHTML =
+    '<div class="pomodoro-container">' +
+      '<div class="pomodoro-mode-btns">' +
+        '<button class="small ' + (pomodoroMode === 'countdown' ? '' : 'secondary') + '" onclick="setPomodoroMode(\'countdown\')">⏳ 倒计时</button>' +
+        '<button class="small ' + (pomodoroMode === 'stopwatch' ? '' : 'secondary') + '" onclick="setPomodoroMode(\'stopwatch\')">⏱️ 正计时</button>' +
+      '</div>' +
+      (pomodoroMode === 'countdown' ?
+        '<div class="form-group" style="max-width:320px;margin:0 auto 1rem;">' +
+          '<label>时长（分钟）</label>' +
+          '<select id="pomodoroDuration" onchange="updatePomodoroTarget()">' +
+            '<option value="15">15 分钟</option>' +
+            '<option value="25" selected>25 分钟</option>' +
+            '<option value="45">45 分钟</option>' +
+            '<option value="60">60 分钟</option>' +
+            '<option value="custom">自定义</option>' +
+          '</select>' +
+          '<input id="pomodoroCustomDuration" type="number" min="1" placeholder="自定义分钟" style="display:none;margin-top:0.5rem;" oninput="updatePomodoroTarget()" />' +
+        '</div>' : '') +
+      '<div class="pomodoro-timer" id="pomodoroTimerDisplay" style="color:' + timerColor + ';">' + display + '</div>' +
+      '<div class="pomodoro-task-row">' +
+        '<input id="pomodoroTaskName" placeholder="📝 正在做什么..." value="" />' +
+      '</div>' +
+      '<div class="pomodoro-selects" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;">' +
+        '<div class="form-group" style="margin:0;"><label>关联领域</label><select id="pomodoroArea">' + areaOptions + '</select></div>' +
+        '<div class="form-group" style="margin:0;"><label>关联项目</label><select id="pomodoroProject" onchange="pomodoroUpdateTaskOptions()">' + projectOptions + '</select></div>' +
+        '<div class="form-group" style="margin:0;"><label>关联事项</label><select id="pomodoroTaskSelect"><option value="">无</option></select></div>' +
+      '</div>' +
+      '<div class="pomodoro-controls">' +
+        (pomodoroRunning ?
+          '<button class="small secondary" onclick="pausePomodoro()">⏸️ 暂停</button>' :
+          '<button class="small" onclick="startPomodoro()" style="background:var(--success);">▶️ 开始</button>') +
+        '<button class="small" onclick="finishPomodoro()" ' + (pomodoroElapsedSeconds > 0 ? '' : 'disabled') + ' style="background:var(--accent);">✅ 结束并保存</button>' +
+        '<button class="small secondary" onclick="resetPomodoro()">🔄 放弃</button>' +
+      '</div>' +
+      '<div class="pomodoro-tip" style="color:var(--text-muted);font-size:0.8rem;text-align:center;margin-top:0.5rem;">' +
+        (pomodoroMode === 'countdown' ? '专注倒计时，结束后自动提醒并保存到今日时间块。' : '正计时模式，点击「结束并保存」记录本次专注时长。') +
+      '</div>' +
+    '</div>';
+
+  // 恢复当前倒计时选择
+  if (pomodoroMode === 'countdown') {
+    var durationSelect = document.getElementById('pomodoroDuration');
+    var customInput = document.getElementById('pomodoroCustomDuration');
+    if (durationSelect && [15, 25, 45, 60].indexOf(pomodoroTargetSeconds / 60) === -1) {
+      durationSelect.value = 'custom';
+      if (customInput) {
+        customInput.style.display = 'block';
+        customInput.value = pomodoroTargetSeconds / 60;
+      }
+    }
+  }
+}
+
+function setPomodoroMode(mode) {
+  pausePomodoro();
+  pomodoroMode = mode;
+  pomodoroElapsedSeconds = 0;
+  pomodoroTargetSeconds = mode === 'countdown' ? 25 * 60 : 0;
+  renderPomodoroView();
+  updatePomodoroDisplay();
+}
+
+function updatePomodoroTarget() {
+  var select = document.getElementById('pomodoroDuration');
+  var customInput = document.getElementById('pomodoroCustomDuration');
+  if (!select) return;
+  if (select.value === 'custom') {
+    if (customInput) customInput.style.display = 'block';
+    pomodoroTargetSeconds = (parseInt(customInput.value) || 25) * 60;
+  } else {
+    if (customInput) customInput.style.display = 'none';
+    pomodoroTargetSeconds = parseInt(select.value) * 60;
+  }
+  updatePomodoroDisplay();
+}
+
+function pomodoroUpdateTaskOptions() {
+  var projectSelect = document.getElementById('pomodoroProject');
+  var taskSelect = document.getElementById('pomodoroTaskSelect');
+  if (!projectSelect || !taskSelect) return;
+  var projectId = projectSelect.value;
+  var projects = loadProjects();
+  var project = projects.find(function(p) { return p.id === projectId; });
+  var options = '<option value="">无</option>';
+  if (project && project.annualBudget && project.annualBudget.subTasks) {
+    project.annualBudget.subTasks.forEach(function(t) {
+      options += '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
+    });
+  }
+  taskSelect.innerHTML = options;
+}
+
+function formatPomodoroTime(seconds) {
+  var m = Math.floor(Math.abs(seconds) / 60);
+  var s = Math.abs(seconds) % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function updatePomodoroDisplay() {
+  var display = document.getElementById('pomodoroTimerDisplay');
+  if (!display) return;
+  if (pomodoroMode === 'countdown') {
+    var remaining = Math.max(0, pomodoroTargetSeconds - pomodoroElapsedSeconds);
+    display.textContent = formatPomodoroTime(remaining);
+  } else {
+    display.textContent = formatPomodoroTime(pomodoroElapsedSeconds);
+  }
+}
+
+function startPomodoro() {
+  if (pomodoroRunning) return;
+  if (!pomodoroSessionStart) pomodoroSessionStart = new Date();
+  pomodoroRunning = true;
+  renderPomodoroView();
+  pomodoroTimer = setInterval(function() {
+    pomodoroElapsedSeconds++;
+    updatePomodoroDisplay();
+    if (pomodoroMode === 'countdown' && pomodoroElapsedSeconds >= pomodoroTargetSeconds) {
+      finishPomodoro(true);
+    }
+  }, 1000);
+}
+
+function pausePomodoro() {
+  if (!pomodoroRunning) return;
+  pomodoroRunning = false;
+  clearInterval(pomodoroTimer);
+  pomodoroTimer = null;
+  renderPomodoroView();
+}
+
+function resetPomodoro() {
+  pomodoroRunning = false;
+  clearInterval(pomodoroTimer);
+  pomodoroTimer = null;
+  pomodoroElapsedSeconds = 0;
+  pomodoroSessionStart = null;
+  renderPomodoroView();
+  updatePomodoroDisplay();
+}
+
+function finishPomodoro(autoFinished) {
+  if (pomodoroElapsedSeconds <= 0) return;
+
+  pausePomodoro();
+
+  var taskName = document.getElementById('pomodoroTaskName').value.trim() || '🍅 番茄钟';
+  var areaId = document.getElementById('pomodoroArea').value || null;
+  var projectId = document.getElementById('pomodoroProject').value || null;
+  var budgetTaskId = document.getElementById('pomodoroTaskSelect').value || null;
+
+  var todayStr = today();
+  var dailyPlans = loadDailyPlans();
+  var plan = dailyPlans[todayStr];
+  if (!plan) {
+    plan = generateDailyPlan(todayStr);
+  }
+
+  var endTime = new Date();
+  var startTime = pomodoroSessionStart ? new Date(pomodoroSessionStart.getTime()) : new Date(endTime.getTime() - pomodoroElapsedSeconds * 1000);
+  var hours = Math.max(pomodoroElapsedSeconds / 3600, 0.05);
+
+  plan.blocks.push({
+    id: uid(),
+    name: taskName,
+    start: minutesToTime(startTime.getHours() * 60 + startTime.getMinutes()),
+    end: minutesToTime(endTime.getHours() * 60 + endTime.getMinutes()),
+    hours: hours,
+    color: '#F0C8A0',
+    icon: '🍅',
+    task: taskName,
+    areaId: areaId,
+    projectId: projectId,
+    budgetTaskId: budgetTaskId,
+    date: todayStr,
+    done: true,
+    note: ''
+  });
+  plan.blocks.sort(function(a, b) { return timeToMinutes(a.start) - timeToMinutes(b.start); });
+  plan.totalHours = plan.blocks.reduce(function(sum, b) { return sum + b.hours; }, 0);
+  plan.completedHours = plan.blocks.filter(function(b) { return b.done; }).reduce(function(sum, b) { return sum + b.hours; }, 0);
+  saveDailyPlans(dailyPlans);
+
+  resetPomodoro();
+  renderTodayView();
+  renderYearlyTime();
+  renderWeekPlan();
+  renderYearPlan();
+  renderProjectBudgetOverview();
+
+  var minutes = Math.round(hours * 60);
+  showToast((autoFinished ? '⏰ 番茄钟结束' : '✅ 已保存') + '：' + taskName + '（' + minutes + ' 分钟）');
 }
 
 // ============================================================
@@ -1777,7 +2027,7 @@ function switchToPlanning(areaId) {
 function renderDashboardPage() {
   renderBanner();
   renderInbox();
-  renderTodayTimeBlocks();
+  renderTodayView();
   renderAreaOverview();
   renderCalendar();
   renderYearlyTime();
@@ -3440,7 +3690,7 @@ async function initialize() {
   // 渲染等...
   renderBanner();
   renderInbox();
-  renderTodayTimeBlocks();
+  renderTodayView();
   renderAreaOverview();
   renderPlanning();
   renderResources();

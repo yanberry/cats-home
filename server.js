@@ -33,7 +33,8 @@ function initDataFile() {
       pair_time_templates: null,  // 新加
       pair_daily_plans: {},       // 新加
       pair_weekly_plans: {},      // 新加
-      pair_annual_goals: []       // 新加
+      pair_annual_goals: [],      // 新加
+      pair_media_library: []      // 新加
     };
     fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), 'utf8');
     console.log('✅ 已创建 data.json');

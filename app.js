@@ -17,7 +17,8 @@ const STORE = {
   time_templates: 'pair_time_templates',
   daily_plans: 'pair_daily_plans',
   weekly_plans: 'pair_weekly_plans',
-  annual_goals: 'pair_annual_goals'
+  annual_goals: 'pair_annual_goals',
+  media: 'pair_media_library'
 };
 
 // ===== 服务器 API 配置 =====
@@ -191,6 +192,266 @@ function saveWeeklyPlans(value) { saveDataSync(STORE.weekly_plans, value); }
 function loadAnnualGoals() { return loadData(STORE.annual_goals) || []; }
 function saveAnnualGoals(value) { saveDataSync(STORE.annual_goals, value); }
 
+// ============================================================
+// 📚 影音阅读模块
+// ============================================================
+function loadMediaLibrary() { return loadData(STORE.media) || []; }
+function saveMediaLibrary(value) { saveDataSync(STORE.media, value); }
+
+function getMediaTypes() {
+  return ['📚 书籍', '🎬 电影', '📺 电视剧', '🎮 游戏', '🎧 播客'];
+}
+
+function getMediaStatuses() {
+  return ['📖 想读/想看', '🔄 进行中', '✅ 已完成', '⏸️ 暂停'];
+}
+
+function renderMediaLibrary() {
+  const container = document.getElementById('mediaLibraryContainer');
+  if (!container) return;
+
+  const items = loadMediaLibrary();
+  const filterType = document.getElementById('mediaFilterType')?.value || 'all';
+  const filterStatus = document.getElementById('mediaFilterStatus')?.value || 'all';
+  const searchQuery = document.getElementById('mediaSearchInput')?.value?.trim().toLowerCase() || '';
+
+  let filtered = items;
+  if (filterType !== 'all') filtered = filtered.filter(item => item.type === filterType);
+  if (filterStatus !== 'all') filtered = filtered.filter(item => item.status === filterStatus);
+  if (searchQuery) {
+    filtered = filtered.filter(item =>
+      item.title.toLowerCase().includes(searchQuery) ||
+      (item.author && item.author.toLowerCase().includes(searchQuery)) ||
+      (item.notes && item.notes.toLowerCase().includes(searchQuery))
+    );
+  }
+
+  // 按添加时间倒序
+  filtered.sort((a, b) => b.createdAt - a.createdAt);
+
+  // 统计
+  const stats = getMediaStats(items);
+
+  let html = `
+    <div class="media-stats-bar">
+      <div class="stat-item"><span class="num">${stats.total}</span><span class="label">📚 总数</span></div>
+      <div class="stat-item"><span class="num" style="color:var(--success);">${stats.completed}</span><span class="label">✅ 已完成</span></div>
+      <div class="stat-item"><span class="num" style="color:var(--warning);">${stats.inProgress}</span><span class="label">🔄 进行中</span></div>
+      <div class="stat-item"><span class="num" style="color:var(--text-muted);">${stats.wantTo}</span><span class="label">📖 想读/想看</span></div>
+    </div>
+
+    <div class="media-filters">
+      <select id="mediaFilterType" onchange="renderMediaLibrary()">
+        <option value="all">📋 全部类型</option>
+        <option value="📚 书籍" ${filterType === '📚 书籍' ? 'selected' : ''}>📚 书籍</option>
+        <option value="🎬 电影" ${filterType === '🎬 电影' ? 'selected' : ''}>🎬 电影</option>
+        <option value="📺 电视剧" ${filterType === '📺 电视剧' ? 'selected' : ''}>📺 电视剧</option>
+        <option value="🎮 游戏" ${filterType === '🎮 游戏' ? 'selected' : ''}>🎮 游戏</option>
+        <option value="🎧 播客" ${filterType === '🎧 播客' ? 'selected' : ''}>🎧 播客</option>
+      </select>
+      <select id="mediaFilterStatus" onchange="renderMediaLibrary()">
+        <option value="all">📌 全部状态</option>
+        <option value="📖 想读/想看" ${filterStatus === '📖 想读/想看' ? 'selected' : ''}>📖 想读/想看</option>
+        <option value="🔄 进行中" ${filterStatus === '🔄 进行中' ? 'selected' : ''}>🔄 进行中</option>
+        <option value="✅ 已完成" ${filterStatus === '✅ 已完成' ? 'selected' : ''}>✅ 已完成</option>
+        <option value="⏸️ 暂停" ${filterStatus === '⏸️ 暂停' ? 'selected' : ''}>⏸️ 暂停</option>
+      </select>
+      <input id="mediaSearchInput" placeholder="🔍 搜索标题/作者/笔记..." value="${escapeHtml(searchQuery)}" oninput="renderMediaLibrary()" />
+      <button onclick="showAddMediaModal()" style="white-space:nowrap;">➕ 添加</button>
+    </div>
+  `;
+
+  if (!filtered.length) {
+    html += `<div class="empty-media-state">📭 ${searchQuery ? '没有匹配的结果' : '还没有记录，点击「添加」开始你的影音阅读之旅 ✨'}</div>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  html += `<div class="media-grid">`;
+  filtered.forEach(item => {
+    const progress = item.total ? Math.round((item.progress || 0) / item.total * 100) : 0;
+    const statusEmoji = item.status === '✅ 已完成' ? '✅' :
+                         item.status === '🔄 进行中' ? '🔄' :
+                         item.status === '⏸️ 暂停' ? '⏸️' : '📖';
+
+    html += `
+      <div class="media-card" style="border-left-color: ${item.color || '#C4A0C4'};">
+        <div class="media-header">
+          <span class="media-type-tag">${item.type}</span>
+          <span class="media-status-tag" style="background:${item.status === '✅ 已完成' ? 'var(--success-bg)' : item.status === '🔄 进行中' ? 'var(--warning-bg)' : 'var(--primary-soft)'};">
+            ${statusEmoji} ${item.status}
+          </span>
+        </div>
+        <div class="media-title">${escapeHtml(item.title)}</div>
+        ${item.author ? `<div class="media-author">✍️ ${escapeHtml(item.author)}</div>` : ''}
+        ${item.year ? `<div class="media-year">📅 ${escapeHtml(item.year)}</div>` : ''}
+        ${item.rating ? `<div class="media-rating">⭐ ${item.rating}/10</div>` : ''}
+        ${item.total ? `
+          <div class="media-progress">
+            <div class="media-progress-bar"><div style="width:${progress}%;"></div></div>
+            <span>${item.progress || 0} / ${item.total} ${item.unit || ''}</span>
+          </div>
+        ` : ''}
+        ${item.notes ? `<div class="media-notes">💬 ${escapeHtml(item.notes)}</div>` : ''}
+        ${item.link ? `<a href="${item.link}" target="_blank" class="media-link">🔗 链接</a>` : ''}
+        <div class="media-actions">
+          <span class="media-date">📅 ${new Date(item.createdAt).toLocaleDateString()}</span>
+          <div>
+            <button class="small secondary" onclick="editMediaItem('${item.id}')" style="padding:0.05rem 0.6rem;font-size:0.7rem;">✏️</button>
+            <button class="small secondary" onclick="deleteMediaItem('${item.id}')" style="padding:0.05rem 0.6rem;font-size:0.7rem;background:#FDE8E8;color:#B05858;">🗑️</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+
+  container.innerHTML = html;
+}
+
+function getMediaStats(items) {
+  return {
+    total: items.length,
+    completed: items.filter(i => i.status === '✅ 已完成').length,
+    inProgress: items.filter(i => i.status === '🔄 进行中').length,
+    wantTo: items.filter(i => i.status === '📖 想读/想看').length
+  };
+}
+
+function showAddMediaModal() {
+  const typeOptions = getMediaTypes().map(t => `<option value="${t}">${t}</option>`).join('');
+  const statusOptions = getMediaStatuses().map(s => `<option value="${s}">${s}</option>`).join('');
+
+  openModal(`
+    <h2>📚 添加影音阅读记录</h2>
+    <div class="form-group"><label>类型</label><select id="newMediaType">${typeOptions}</select></div>
+    <div class="form-group"><label>标题 <span style="color:var(--primary);">*</span></label><input id="newMediaTitle" placeholder="书名/电影名/剧名..." /></div>
+    <div class="form-group"><label>作者/导演/主演</label><input id="newMediaAuthor" placeholder="作者或创作者" /></div>
+    <div class="form-group"><label>年份</label><input id="newMediaYear" placeholder="2026" /></div>
+    <div class="form-group"><label>状态</label><select id="newMediaStatus">${statusOptions}</select></div>
+    <div class="form-group"><label>评分 (0-10)</label><input id="newMediaRating" type="number" min="0" max="10" step="0.5" placeholder="8.5" /></div>
+    <div class="form-group"><label>进度（如：已读页数/总页数）</label>
+      <div style="display:flex;gap:0.5rem;">
+        <input id="newMediaProgress" type="number" placeholder="已读/已看" style="flex:1;" />
+        <span style="display:flex;align-items:center;">/</span>
+        <input id="newMediaTotal" type="number" placeholder="总数" style="flex:1;" />
+        <input id="newMediaUnit" placeholder="单位（页/集/小时）" style="flex:1;" />
+      </div>
+    </div>
+    <div class="form-group"><label>笔记/感想</label><textarea id="newMediaNotes" rows="4" placeholder="你的读书笔记、观后感..."></textarea></div>
+    <div class="form-group"><label>链接（豆瓣/IMDB/官网）</label><input id="newMediaLink" placeholder="https://..." /></div>
+    <div class="form-group"><label>颜色标签</label><input id="newMediaColor" type="color" value="#C4A0C4" /></div>
+    <div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveNewMediaItem()">保存</button></div>
+  `);
+}
+
+function saveNewMediaItem() {
+  const type = document.getElementById('newMediaType').value;
+  const title = document.getElementById('newMediaTitle').value.trim();
+  const author = document.getElementById('newMediaAuthor').value.trim();
+  const year = document.getElementById('newMediaYear').value.trim();
+  const status = document.getElementById('newMediaStatus').value;
+  const rating = parseFloat(document.getElementById('newMediaRating').value) || 0;
+  const progress = parseInt(document.getElementById('newMediaProgress').value) || 0;
+  const total = parseInt(document.getElementById('newMediaTotal').value) || 0;
+  const unit = document.getElementById('newMediaUnit').value.trim() || '页';
+  const notes = document.getElementById('newMediaNotes').value.trim();
+  const link = document.getElementById('newMediaLink').value.trim();
+  const color = document.getElementById('newMediaColor').value || '#C4A0C4';
+
+  if (!title) { alert('请输入标题'); return; }
+
+  const library = loadMediaLibrary();
+  library.push({
+    id: uid(),
+    type,
+    title,
+    author,
+    year,
+    status,
+    rating: Math.min(10, Math.max(0, rating)),
+    progress,
+    total,
+    unit,
+    notes,
+    link,
+    color,
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  });
+  saveMediaLibrary(library);
+  closeModal();
+  renderMediaLibrary();
+  showToast('✅ 已添加：' + title);
+}
+
+function editMediaItem(itemId) {
+  const library = loadMediaLibrary();
+  const item = library.find(i => i.id === itemId);
+  if (!item) return;
+
+  const typeOptions = getMediaTypes().map(t => `<option value="${t}" ${t === item.type ? 'selected' : ''}>${t}</option>`).join('');
+  const statusOptions = getMediaStatuses().map(s => `<option value="${s}" ${s === item.status ? 'selected' : ''}>${s}</option>`).join('');
+
+  openModal(`
+    <h2>✏️ 编辑影音阅读记录</h2>
+    <div class="form-group"><label>类型</label><select id="editMediaType">${typeOptions}</select></div>
+    <div class="form-group"><label>标题 <span style="color:var(--primary);">*</span></label><input id="editMediaTitle" value="${escapeHtml(item.title)}" /></div>
+    <div class="form-group"><label>作者/导演/主演</label><input id="editMediaAuthor" value="${escapeHtml(item.author || '')}" /></div>
+    <div class="form-group"><label>年份</label><input id="editMediaYear" value="${escapeHtml(item.year || '')}" /></div>
+    <div class="form-group"><label>状态</label><select id="editMediaStatus">${statusOptions}</select></div>
+    <div class="form-group"><label>评分 (0-10)</label><input id="editMediaRating" type="number" min="0" max="10" step="0.5" value="${item.rating || 0}" /></div>
+    <div class="form-group"><label>进度</label>
+      <div style="display:flex;gap:0.5rem;">
+        <input id="editMediaProgress" type="number" value="${item.progress || 0}" style="flex:1;" />
+        <span style="display:flex;align-items:center;">/</span>
+        <input id="editMediaTotal" type="number" value="${item.total || 0}" style="flex:1;" />
+        <input id="editMediaUnit" value="${escapeHtml(item.unit || '页')}" style="flex:1;" />
+      </div>
+    </div>
+    <div class="form-group"><label>笔记/感想</label><textarea id="editMediaNotes" rows="4">${escapeHtml(item.notes || '')}</textarea></div>
+    <div class="form-group"><label>链接</label><input id="editMediaLink" value="${escapeHtml(item.link || '')}" /></div>
+    <div class="form-group"><label>颜色标签</label><input id="editMediaColor" type="color" value="${item.color || '#C4A0C4'}" /></div>
+    <div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveEditMediaItem('${itemId}')">保存</button></div>
+  `);
+}
+
+function saveEditMediaItem(itemId) {
+  const library = loadMediaLibrary();
+  const item = library.find(i => i.id === itemId);
+  if (!item) return;
+
+  const title = document.getElementById('editMediaTitle').value.trim();
+  if (!title) { alert('请输入标题'); return; }
+
+  item.type = document.getElementById('editMediaType').value;
+  item.title = title;
+  item.author = document.getElementById('editMediaAuthor').value.trim();
+  item.year = document.getElementById('editMediaYear').value.trim();
+  item.status = document.getElementById('editMediaStatus').value;
+  item.rating = Math.min(10, Math.max(0, parseFloat(document.getElementById('editMediaRating').value) || 0));
+  item.progress = parseInt(document.getElementById('editMediaProgress').value) || 0;
+  item.total = parseInt(document.getElementById('editMediaTotal').value) || 0;
+  item.unit = document.getElementById('editMediaUnit').value.trim() || '页';
+  item.notes = document.getElementById('editMediaNotes').value.trim();
+  item.link = document.getElementById('editMediaLink').value.trim();
+  item.color = document.getElementById('editMediaColor').value || '#C4A0C4';
+  item.updatedAt = Date.now();
+
+  saveMediaLibrary(library);
+  closeModal();
+  renderMediaLibrary();
+  showToast('✅ 已更新：' + item.title);
+}
+
+function deleteMediaItem(itemId) {
+  if (!confirm('确定删除这条记录吗？')) return;
+  const library = loadMediaLibrary().filter(i => i.id !== itemId);
+  saveMediaLibrary(library);
+  renderMediaLibrary();
+  showToast('🗑️ 已删除');
+}
+
 // ===== 储蓄账户 =====
 function loadSavingsAccounts() {
   var accounts = loadData(STORE.savings) || [];
@@ -300,7 +561,77 @@ function renderBanner() {
     return '<div class="star-item"><span>' + (area.icon || '🌟') + '</span><span>' + area.name + '</span><span class="stars" onclick="editAreaStars(\'' + area.id + '\')" title="点击修改星级">' + filled + empty + '</span></div>';
   }).join('');
 }
+// ============================================================
+// 🕐 当前时间 & 今日剩余更新
+// ============================================================
+function updateCurrentTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const timeStr = hours + ':' + minutes;
+  
+  const timeDisplay = document.getElementById('currentTimeDisplay');
+  if (timeDisplay) {
+    timeDisplay.textContent = '🕐 现在 ' + timeStr;
+  }
 
+  // ---- 计算今日剩余可用工作时间（新逻辑） ----
+  const settings = loadUserSettings();
+  const sleepTime = settings.sleepTime || '22:00';
+  const restBlocks = settings.restBlocks || [];
+
+  // 1. 计算到睡觉时间的物理剩余小时数
+  const [sh, sm] = sleepTime.split(':').map(Number);
+  const sleepDate = new Date(now);
+  sleepDate.setHours(sh, sm, 0, 0);
+  
+  let physicalRemaining = (sleepDate - now) / (1000 * 60 * 60);
+  if (physicalRemaining < 0) {
+    physicalRemaining = 0; // 已经过了睡觉时间
+  }
+
+  // 2. 计算今天还没发生的休息时间总和
+  const todayStr = today();
+  const todayDate = new Date(todayStr);
+  let futureRestHours = 0;
+  
+  restBlocks.forEach(function(block) {
+    const [bStartH, bStartM] = block.start.split(':').map(Number);
+    const [bEndH, bEndM] = block.end.split(':').map(Number);
+    
+    const blockStart = new Date(todayDate);
+    blockStart.setHours(bStartH, bStartM, 0, 0);
+    
+    const blockEnd = new Date(todayDate);
+    blockEnd.setHours(bEndH, bEndM, 0, 0);
+    
+    // 如果休息块的结束时间 > 当前时间，说明该休息块还没完全过去
+    if (blockEnd > now) {
+      // 如果休息块还没开始，则全部计入未来休息
+      if (blockStart >= now) {
+        futureRestHours += (blockEnd - blockStart) / (1000 * 60 * 60);
+      } 
+      // 如果休息块已经开始但还没结束，只计算剩余部分
+      else if (blockStart < now && blockEnd > now) {
+        futureRestHours += (blockEnd - now) / (1000 * 60 * 60);
+      }
+    }
+  });
+
+  // 3. 最终可用剩余 = 物理剩余 - 未来休息时间
+  let availableRemaining = Math.max(0, physicalRemaining - futureRestHours);
+
+  const remainDisplay = document.getElementById('todayRemainingDisplay');
+  if (remainDisplay) {
+    if (physicalRemaining <= 0) {
+      remainDisplay.textContent = '🌙 已到睡觉时间，好好休息～';
+      remainDisplay.style.color = 'var(--text-muted)';
+    } else {
+      remainDisplay.textContent = '⏳ 今日剩余 ' + availableRemaining.toFixed(1) + 'h 可用';
+      remainDisplay.style.color = availableRemaining > 2 ? 'var(--success)' : '#C07070';
+    }
+  }
+}
 function renderInbox() {
   var inbox = loadInbox();
   var container = document.getElementById('inboxList');
@@ -3119,6 +3450,8 @@ async function initialize() {
   renderProjectBudgetOverview();
   renderWeekPlan();
   renderYearPlan();
+  updateCurrentTime();               // 立即显示
+setInterval(updateCurrentTime, 10000); // 每10秒刷新一次
   setInterval(function() {
     renderYearlyTime();
     renderWeekPlan();
@@ -3140,6 +3473,7 @@ document.querySelectorAll('.nav-bar a').forEach(function(link) {
     if (link.dataset.page === 'dashboard') renderDashboardPage();
     else if (link.dataset.page === 'planning') renderPlanning();
     else if (link.dataset.page === 'resources') renderResources();
+    else if (link.dataset.page === 'media') renderMediaLibrary();
     else if (link.dataset.page === 'minimalist') renderMinimalistPage();
   });
 });

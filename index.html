@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -13,6 +13,7 @@
       <a href="#" data-page="dashboard" class="active">🍩 仪表盘</a>
       <a href="#" data-page="planning">🍅 规划</a>
       <a href="#" data-page="resources">🍡 资源</a>
+      <a href="#" data-page="media" class="media-nav">📚 影音阅读</a>
       <a href="#" data-page="minimalist" class="minimalist-nav">🧹 极简生活</a>
       <span style="display:flex;gap:0.3rem;margin-left:auto;">
         <button class="small secondary" onclick="exportAllData()" style="font-size:0.75rem;padding:0.3rem 0.7rem;background:#A8D5A8;color:#fff;border:none;">💾 备份</button>
@@ -23,12 +24,18 @@
     <!-- ===== 仪表盘页面 ===== -->
     <div id="page-dashboard" class="page active">
       <div class="banner" id="bannerArea">
-        <div class="theme" id="themeDisplay">
-          <span class="emoji-deco">🌟</span> 猫猫女巫的安全屋 <span class="emoji-deco">🐈‍⬛</span>
-        </div>
-        <div class="areas-stars" id="starsContainer"></div>
-        <button class="small secondary" onclick="editBanner()">✏️ 编辑主题</button>
-      </div>
+  <div style="display:flex; flex-wrap:wrap; gap:1rem; align-items:center; width:100%;">
+    <div class="theme" id="themeDisplay">
+      <span class="emoji-deco">🌟</span> 猫猫女巫的安全屋 <span class="emoji-deco">🐈‍⬛</span>
+    </div>
+    <div style="display:flex; gap:1.5rem; align-items:center; margin-left:auto; flex-wrap:wrap;">
+      <span id="currentTimeDisplay" style="font-weight:600; color:var(--primary-dark);">🕐 现在 --:--</span>
+      <span id="todayRemainingDisplay" style="font-weight:600; color:var(--text);">⏳ 今日剩余 --h</span>
+    </div>
+  </div>
+  <div class="areas-stars" id="starsContainer"></div>
+  <button class="small secondary" onclick="editBanner()">✏️ 编辑主题</button>
+</div>
 
       <div class="card inbox-area">
         <div class="inbox-input-row">
@@ -106,7 +113,7 @@
           <button class="small secondary" onclick="showEditTemplateModal()">📝 时间模板</button>
         </div>
       </div>
-      <div id="planningDailySummary" class="planning-daily-summary card"></div>
+      <!-- <div id="planningDailySummary" class="planning-daily-summary card"></div> -->
       <div id="planningContainer" class="planning-area"></div>
     </div>
 
@@ -122,6 +129,17 @@
         <input id="filterSearch" placeholder="🔍 搜索标题 / 内容..." oninput="renderResources()" />
       </div>
       <div id="resourceGrid" class="resource-grid"></div>
+    </div>
+
+    <!-- ===== 影音阅读页面 ===== -->
+    <div id="page-media" class="page">
+      <div class="flex-between mb-1">
+        <h2>📚 影音阅读</h2>
+        <span style="color:var(--text-muted);font-size:0.85rem;">记录书籍、电影、电视剧、游戏、播客</span>
+      </div>
+      <div class="card">
+        <div id="mediaLibraryContainer"></div>
+      </div>
     </div>
 
     <!-- ===== 极简生活页面 ===== -->

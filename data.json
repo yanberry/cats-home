@@ -389,7 +389,7 @@
         }
       ],
       "totalHours": 17,
-      "completedHours": 0,
+      "completedHours": 0.05,
       "status": "planned"
     }
   },

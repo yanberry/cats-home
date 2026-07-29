@@ -1265,9 +1265,31 @@ function renderTodayView() {
   }
 }
 
+function capturePomodoroForm() {
+  return {
+    taskName: document.getElementById('pomodoroTaskName')?.value || '',
+    areaId: document.getElementById('pomodoroArea')?.value || '',
+    projectId: document.getElementById('pomodoroProject')?.value || '',
+    taskId: document.getElementById('pomodoroTaskSelect')?.value || ''
+  };
+}
+
+function restorePomodoroForm(values) {
+  var taskNameInput = document.getElementById('pomodoroTaskName');
+  var areaSelect = document.getElementById('pomodoroArea');
+  var projectSelect = document.getElementById('pomodoroProject');
+  var taskSelect = document.getElementById('pomodoroTaskSelect');
+  if (taskNameInput) taskNameInput.value = values.taskName;
+  if (areaSelect) areaSelect.value = values.areaId;
+  if (projectSelect) projectSelect.value = values.projectId;
+  if (taskSelect) taskSelect.value = values.taskId;
+}
+
 function renderPomodoroView() {
   var container = document.getElementById('pomodoroView');
   if (!container) return;
+
+  var formValues = capturePomodoroForm();
 
   var areas = loadAreas();
   var projects = loadProjects();
@@ -1319,6 +1341,19 @@ function renderPomodoroView() {
         (pomodoroMode === 'countdown' ? '专注倒计时，结束后自动提醒并保存到今日时间块。' : '正计时模式，点击「结束并保存」记录本次专注时长。') +
       '</div>' +
     '</div>';
+
+  
+// ✅ 1. 先恢复项目下拉框的值
+var projectSelect = document.getElementById('pomodoroProject');
+if (projectSelect && formValues.projectId) {
+    projectSelect.value = formValues.projectId;
+}
+
+// ✅ 2. 手动触发任务选项更新（根据当前项目）
+pomodoroUpdateTaskOptions();
+
+// ✅ 3. 再恢复所有表单值（包括任务选择）
+restorePomodoroForm(formValues);
 
   // 恢复当前倒计时选择
   if (pomodoroMode === 'countdown') {
@@ -1427,7 +1462,7 @@ function finishPomodoro(autoFinished) {
 
   pausePomodoro();
 
-  var taskName = document.getElementById('pomodoroTaskName').value.trim() || '🍅 番茄钟';
+  var taskName = document.getElementById('pomodoroTaskName').value.trim();
   var areaId = document.getElementById('pomodoroArea').value || null;
   var projectId = document.getElementById('pomodoroProject').value || null;
   var budgetTaskId = document.getElementById('pomodoroTaskSelect').value || null;
@@ -1445,7 +1480,7 @@ function finishPomodoro(autoFinished) {
 
   plan.blocks.push({
     id: uid(),
-    name: taskName,
+    name: ' 番茄钟',
     start: minutesToTime(startTime.getHours() * 60 + startTime.getMinutes()),
     end: minutesToTime(endTime.getHours() * 60 + endTime.getMinutes()),
     hours: hours,
@@ -1472,7 +1507,7 @@ function finishPomodoro(autoFinished) {
   renderProjectBudgetOverview();
 
   var minutes = Math.round(hours * 60);
-  showToast((autoFinished ? '⏰ 番茄钟结束' : '✅ 已保存') + '：' + taskName + '（' + minutes + ' 分钟）');
+  showToast((autoFinished ? '⏰ 番茄钟结束' : '✅ 已保存') + '：' + (taskName || '🍅 番茄钟') + '（' + minutes + ' 分钟）');
 }
 
 // ============================================================

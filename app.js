@@ -2129,9 +2129,7 @@ function renderProjectCard(project) {
     ? usedDisplay.toFixed(0) + 'h / ' + totalDisplay + 'h'
     : usedDisplay + ' / ' + totalDisplay + (unitDisplay ? ' ' + unitDisplay : '');
 
-  var statusIcons = { '进行中': '🔄', '已完成': '✅', '暂停': '⏸️', '未开始': '⏹' };
-  
-  // ★ 预算标签（复用原逻辑，但确保已用数字来自 getProjectActualHours）
+  // ★ 预算标签
   var budgetLabel = '';
   if (hasBudget) {
     var totalBudget = project.annualBudget.total || 0;
@@ -2142,9 +2140,18 @@ function renderProjectCard(project) {
     budgetLabel = '未设置预算';
   }
 
-  var html = '<div class="project-card"><div class="proj-header"><div><div class="proj-title">' + escapeHtml(project.title) + '</div><div class="proj-meta">' + (statusIcons[project.status] || '') + ' ' + project.status + ' · ' + (project.startDate || '无起始') + ' → ' + (project.endDate || '无结束') + '</div></div><div class="tag">' + (hasBudget ? '进度' : (project.goalQuantifier ? project.goalQuantifier.metric || '进度' : '进度')) + ' ' + progress + '%</div></div><div class="proj-meta">' + progressText + '</div><div class="proj-meta">' + budgetLabel + '</div><div class="proj-progress"><span style="width:' + progress + '%"></span></div><div class="proj-details"><div style="margin:0.5rem 0;">';
+  // ★ 状态下拉选项（带图标）
+  var statusOptions = ['未开始', '进行中', '暂停', '已完成'];
+  var statusIcons = { '未开始': '⏹', '进行中': '🔄', '暂停': '⏸️', '已完成': '✅' };
+  var statusSelect = '<select onchange="updateProjectStatus(\'' + project.id + '\', this.value)" style="padding:0.1rem 0.3rem;font-size:0.8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:#fff;cursor:pointer;">';
+  statusOptions.forEach(function(s) {
+    statusSelect += '<option value="' + s + '" ' + (s === project.status ? 'selected' : '') + '>' + (statusIcons[s] || '') + ' ' + s + '</option>';
+  });
+  statusSelect += '</select>';
 
-  // ★ 事项列表（保持不变，但每个事项的进度是已用/分配）
+  var html = '<div class="project-card"><div class="proj-header"><div><div class="proj-title">' + escapeHtml(project.title) + '</div><div class="proj-meta">' + statusSelect + ' · ' + (project.startDate || '无起始') + ' → ' + (project.endDate || '无结束') + '</div></div><div class="tag">' + (hasBudget ? '进度' : (project.goalQuantifier ? project.goalQuantifier.metric || '进度' : '进度')) + ' ' + progress + '%</div></div><div class="proj-meta">' + progressText + '</div><div class="proj-meta">' + budgetLabel + '</div><div class="proj-progress"><span style="width:' + progress + '%"></span></div><div class="proj-details"><div style="margin:0.5rem 0;">';
+
+  // ★ 事项列表（保持不变）
   if (hasBudget && project.annualBudget.subTasks && project.annualBudget.subTasks.length) {
     html += '<div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.2rem;">📋 事项分配：</div>';
     project.annualBudget.subTasks.forEach(function(task) {
@@ -2174,7 +2181,7 @@ function renderProjectCard(project) {
   html += '</div><div class="flex" style="flex-wrap:wrap; gap:0.6rem; margin-top:0.7rem;">';
   html += '<button class="small secondary" onclick="editProject(\'' + project.id + '\')">✏️ 编辑</button>';
   html += '<button class="small secondary" onclick="deleteProject(\'' + project.id + '\')">🗑️ 删除</button>';
-  html += '<button class="small secondary" onclick="changeProjectStatus(\'' + project.id + '\')">🔄 状态</button>';
+  // ★ 移除了状态切换按钮，因为它已被下拉取代
   html += '<button class="small secondary" onclick="showProjectBudgetModal(\'' + project.id + '\')" style="background:var(--accent);color:#5A3A2A;border-color:var(--accent);">📊 年度预算</button>';
   html += '</div></div></div>';
   return html;
@@ -2619,26 +2626,37 @@ function deleteProject(projectId) {
   renderTodayTimeBlocks();
   renderAreaOverview();
 }
-
-function changeProjectStatus(projectId) {
-  var project = getProject(projectId);
-  if (!project) return;
-  var statuses = ['未开始', '进行中', '暂停', '已完成'];
-  var nextStatus = statuses[(statuses.indexOf(project.status) + 1) % statuses.length] || '进行中';
-  if (!confirm('将项目「' + project.title + '」状态从「' + project.status + '」改为「' + nextStatus + '」？')) return;
-  project.status = nextStatus;
+// 直接更新项目状态（由下拉菜单触发）
+function updateProjectStatus(projectId, newStatus) {
   var projects = loadProjects();
-  for (var i = 0; i < projects.length; i++) {
-    if (projects[i].id === projectId) {
-      projects[i] = project;
-      break;
-    }
-  }
+  var project = projects.find(function(p) { return p.id === projectId; });
+  if (!project) return;
+  project.status = newStatus;
   saveProjects(projects);
   renderPlanning();
   renderTodayTimeBlocks();
   renderAreaOverview();
+  showToast('✅ 状态已更新为：' + newStatus);
 }
+// function changeProjectStatus(projectId) {
+//   var project = getProject(projectId);
+//   if (!project) return;
+//   var statuses = ['未开始', '进行中', '暂停', '已完成'];
+//   var nextStatus = statuses[(statuses.indexOf(project.status) + 1) % statuses.length] || '进行中';
+//   if (!confirm('将项目「' + project.title + '」状态从「' + project.status + '」改为「' + nextStatus + '」？')) return;
+//   project.status = nextStatus;
+//   var projects = loadProjects();
+//   for (var i = 0; i < projects.length; i++) {
+//     if (projects[i].id === projectId) {
+//       projects[i] = project;
+//       break;
+//     }
+//   }
+//   saveProjects(projects);
+//   renderPlanning();
+//   renderTodayTimeBlocks();
+//   renderAreaOverview();
+// }
 
 // ============================================================
 // 资源（保留原样）

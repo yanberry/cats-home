@@ -633,7 +633,7 @@ textarea {
   background: #FBF8FB;
   border-radius: var(--radius-sm);
   padding: 1rem 1.2rem;
-  border-left: 4px solid var(--primary);
+  border-left: 4px solid var(--project-color, var(--primary));  /* 改这一行 */
   transition: var(--transition);
 }
 .project-card:hover {

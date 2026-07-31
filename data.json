@@ -1,6 +1,13 @@
 {
   "pair_areas": [
     {
+      "id": "ms8f5i17o8z1",
+      "name": "做一些对世界有帮助的事情",
+      "icon": "🌟",
+      "stars": 5,
+      "color": "#d5ce0b"
+    },
+    {
       "id": "ms4vh7ok7iax",
       "name": "写作",
       "icon": "🌟",
@@ -16,6 +23,26 @@
     }
   ],
   "pair_projects": [
+    {
+      "id": "ms8f62wxzo1u",
+      "title": "联合国儿童基金会捐款-戒指纪念品",
+      "areaId": "ms8f5i17o8z1",
+      "status": "进行中",
+      "startDate": "2026-07-31",
+      "endDate": "",
+      "goalQuantifier": {
+        "metric": "",
+        "target": 0,
+        "current": 0,
+        "unit": ""
+      },
+      "annualBudget": {
+        "year": 2026,
+        "total": 0,
+        "monthlyQuota": 0,
+        "subTasks": []
+      }
+    },
     {
       "id": "ms624to5dwep",
       "title": "考研",
@@ -35,9 +62,29 @@
         "monthlyQuota": 0,
         "subTasks": [
           {
-            "id": "ms626hiznrdm",
-            "name": "数据结构",
-            "hours": 24
+            "id": "ms6math",
+            "name": "数学（高数+线代）",
+            "hours": 400
+          },
+          {
+            "id": "ms6408",
+            "name": "408专业课（四门）",
+            "hours": 400
+          },
+          {
+            "id": "ms6eng",
+            "name": "英语（单词+阅读+作文）",
+            "hours": 200
+          },
+          {
+            "id": "ms6pol",
+            "name": "政治",
+            "hours": 150
+          },
+          {
+            "id": "ms6rev",
+            "name": "模拟考试与错题复盘",
+            "hours": 250
           }
         ]
       }
@@ -477,6 +524,100 @@
           "projectId": null,
           "budgetTaskId": null,
           "date": "2026-07-30",
+          "done": false,
+          "isRest": false,
+          "note": ""
+        }
+      ],
+      "totalHours": 17,
+      "completedHours": 0,
+      "status": "planned"
+    },
+    "2026-07-31": {
+      "date": "2026-07-31",
+      "template": "工作日",
+      "blocks": [
+        {
+          "id": "ms8f3ne44dlk",
+          "name": "深度工作",
+          "start": "05:00",
+          "end": "12:00",
+          "hours": 7,
+          "color": "#C4A0C4",
+          "icon": "⚡",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-31",
+          "done": false,
+          "isRest": false,
+          "note": ""
+        },
+        {
+          "id": "ms8f3ne4mngf",
+          "name": "午休",
+          "start": "12:00",
+          "end": "13:00",
+          "hours": 1,
+          "color": "#E8E0E8",
+          "icon": "😴",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-31",
+          "done": false,
+          "isRest": true,
+          "note": ""
+        },
+        {
+          "id": "ms8f3ne4v2v7",
+          "name": "项目工作",
+          "start": "13:00",
+          "end": "18:00",
+          "hours": 5,
+          "color": "#7EC8E3",
+          "icon": "💼",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-31",
+          "done": false,
+          "isRest": false,
+          "note": ""
+        },
+        {
+          "id": "ms8f3ne4op0x",
+          "name": "晚餐休息",
+          "start": "18:00",
+          "end": "19:00",
+          "hours": 1,
+          "color": "#E8E0E8",
+          "icon": "😴",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-31",
+          "done": false,
+          "isRest": true,
+          "note": ""
+        },
+        {
+          "id": "ms8f3ne4l9gk",
+          "name": "复盘充电",
+          "start": "19:00",
+          "end": "22:00",
+          "hours": 3,
+          "color": "#F0C8A0",
+          "icon": "🌙",
+          "task": "",
+          "areaId": null,
+          "projectId": null,
+          "budgetTaskId": null,
+          "date": "2026-07-31",
           "done": false,
           "isRest": false,
           "note": ""

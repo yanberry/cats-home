@@ -44,51 +44,51 @@
       }
     },
     {
-      "id": "ms624to5dwep",
-      "title": "考研",
-      "areaId": "ms47rsuj64h8",
-      "status": "进行中",
-      "startDate": "2026-07-29",
-      "endDate": "",
-      "goalQuantifier": {
-        "metric": "",
-        "target": 0,
-        "current": 0,
-        "unit": ""
+  "id": "ms624to5dwep",
+  "title": "考研",
+  "areaId": "ms47rsuj64h8",
+  "status": "进行中",
+  "startDate": "2026-07-29",
+  "endDate": "",
+  "goalQuantifier": {
+    "metric": "",
+    "target": 0,
+    "current": 0,
+    "unit": ""
+  },
+  "annualBudget": {
+    "year": 2026,
+    "total": 1800,
+    "monthlyQuota": 0,
+    "subTasks": [
+      {
+        "id": "ms6math",
+        "name": "数学（高数+线代）| 张宇18讲+1000题A → 武忠祥强化+880 → 真题（喻老）→ 李林四套卷",
+        "hours": 400
       },
-      "annualBudget": {
-        "year": 2026,
-        "total": 1800,
-        "monthlyQuota": 0,
-        "subTasks": [
-          {
-            "id": "ms6math",
-            "name": "数学（高数+线代）",
-            "hours": 400
-          },
-          {
-            "id": "ms6408",
-            "name": "408专业课（四门）",
-            "hours": 400
-          },
-          {
-            "id": "ms6eng",
-            "name": "英语（单词+阅读+作文）",
-            "hours": 200
-          },
-          {
-            "id": "ms6pol",
-            "name": "政治",
-            "hours": 150
-          },
-          {
-            "id": "ms6rev",
-            "name": "模拟考试与错题复盘",
-            "hours": 250
-          }
-        ]
+      {
+        "id": "ms6408",
+        "name": "408专业课（四门）| 王道（书+咸鱼课）+ 图领1800（考点分类）+ 真题（21-25年命题规律研究）",
+        "hours": 400
+      },
+      {
+        "id": "ms6eng",
+        "name": "英语（单词+阅读+作文）| 扇贝考研背单词 + 历年阅读真题（逐句翻译订正）+ 8小1大作文模板（背全文）",
+        "hours": 200
+      },
+      {
+        "id": "ms6pol",
+        "name": "政治（肖秀荣全套 + 腿姐冲刺）",
+        "hours": 150
+      },
+      {
+        "id": "ms6rev",
+        "name": "模拟考试与错题复盘 | 两页纸思维定式总结 + 错题圈画（不做错题本，只做错因分类）",
+        "hours": 250
       }
-    },
+    ]
+  }
+},
     {
       "id": "ms4vin7f3e1r",
       "title": "永生之咒-精灵和女巫",

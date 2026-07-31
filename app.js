@@ -803,6 +803,52 @@ function getProjectActualHours(projectId) {
 }
 
 // ============================================================
+// 🌐 全局级联函数（领域 → 项目 → 事项）
+// ============================================================
+// 根据所选领域过滤项目，并自动刷新事项下拉框
+window.updateProjectsByArea = function(prefix) {
+  var areaSelect = document.getElementById(prefix + 'Area');
+  var projectSelect = document.getElementById(prefix + 'Project');
+  var taskSelect = document.getElementById(prefix + 'TaskSelect');
+  if (!areaSelect || !projectSelect) return;
+
+  var areaId = areaSelect.value;
+  var allProjects = loadProjects();
+  var filtered = areaId ? allProjects.filter(p => p.areaId === areaId) : allProjects;
+
+  var currentProjectId = projectSelect.value;
+  projectSelect.innerHTML = '<option value="">无</option>' +
+    filtered.map(p => `<option value="${p.id}">${escapeHtml(p.title)}</option>`).join('');
+
+  // 如果之前选中的项目仍在过滤后的列表中，保持选中
+  if (currentProjectId && filtered.some(p => p.id === currentProjectId)) {
+    projectSelect.value = currentProjectId;
+  }
+
+  // 联动刷新事项
+  window.updateBudgetTasksSelect(prefix);
+};
+
+// 根据所选项目刷新事项下拉框
+window.updateBudgetTasksSelect = function(prefix) {
+  var projectSelect = document.getElementById(prefix + 'Project');
+  var taskSelect = document.getElementById(prefix + 'TaskSelect');
+  if (!projectSelect || !taskSelect) return;
+
+  var projectId = projectSelect.value;
+  var projects = loadProjects();
+  var project = projects.find(p => p.id === projectId);
+
+  var options = '<option value="">无</option>';
+  if (project && project.annualBudget && project.annualBudget.subTasks) {
+    project.annualBudget.subTasks.forEach(t => {
+      options += `<option value="${t.id}">${escapeHtml(t.name)}</option>`;
+    });
+  }
+  taskSelect.innerHTML = options;
+};
+
+// ============================================================
 // 今日时间块渲染
 // ============================================================
 function renderTodayTimeBlocks() {
@@ -977,32 +1023,26 @@ function editTimeBlock(blockId) {
     '<div class="form-group"><label>开始时间</label><input id="editBlockStart" type="time" value="' + block.start + '" /></div>' +
     '<div class="form-group"><label>结束时间</label><input id="editBlockEnd" type="time" value="' + block.end + '" /></div>' +
     '<div class="form-group"><label>任务内容</label><input id="editBlockTask" value="' + escapeHtml(block.task || '') + '" placeholder="具体做什么" /></div>' +
-    '<div class="form-group"><label>关联领域</label><select id="editBlockArea">' + areaOptions + '</select></div>' +
-    '<div class="form-group"><label>关联项目</label><select id="editBlockProject" onchange="updateBudgetTasksSelect(\'edit\')">' + projectOptions + '</select></div>' +
+    '<div class="form-group"><label>关联领域</label><select id="editBlockArea" onchange="updateProjectsByArea(\'editBlock\')">' + areaOptions + '</select></div>' +
+    '<div class="form-group"><label>关联项目</label><select id="editBlockProject" onchange="updateBudgetTasksSelect(\'editBlock\')">' + projectOptions + '</select></div>' +
     '<div class="form-group"><label>关联事项（年度预算）</label><select id="editBlockTaskSelect">' + taskOptions + '</select></div>' +
     '<div class="form-group"><label>备注</label><textarea id="editBlockNote" rows="2">' + escapeHtml(block.note || '') + '</textarea></div>' +
     '<div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveEditTimeBlock(\'' + blockId + '\')">保存</button></div>';
   openModal(html);
-  window.updateBudgetTasksSelect = function(mode) {
-    var projectSelect = document.getElementById(mode + 'BlockProject');
-    var taskSelect = document.getElementById(mode + 'BlockTaskSelect');
-    if (!projectSelect || !taskSelect) return;
-    var projectId = projectSelect.value;
-    var projects = loadProjects();
-    var project = projects.find(function(p) { return p.id === projectId; });
-    var options = '<option value="">无</option>';
-    if (project && project.annualBudget && project.annualBudget.subTasks) {
-      project.annualBudget.subTasks.forEach(function(t) {
-        options += '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
-      });
-    }
-    taskSelect.innerHTML = options;
-  };
+
+  // 初始化级联（恢复已选值）
   setTimeout(function() {
+    var areaSel = document.getElementById('editBlockArea');
     var projSel = document.getElementById('editBlockProject');
-    if (projSel) {
-      projSel.onchange = function() { window.updateBudgetTasksSelect('edit'); };
-    }
+    var taskSel = document.getElementById('editBlockTaskSelect');
+
+    if (areaSel && block.areaId) areaSel.value = block.areaId;
+    window.updateProjectsByArea('editBlock');   // 过滤项目列表
+
+    if (projSel && block.projectId) projSel.value = block.projectId;
+    window.updateBudgetTasksSelect('editBlock'); // 过滤事项列表
+
+    if (taskSel && block.budgetTaskId) taskSel.value = block.budgetTaskId;
   }, 50);
 }
 
@@ -1052,26 +1092,17 @@ function showAddTimeBlockModal(targetDate) {
     '<div class="form-group"><label>开始时间</label><input id="newBlockStart" type="time" value="06:30" /></div>' +
     '<div class="form-group"><label>结束时间</label><input id="newBlockEnd" type="time" value="08:00" /></div>' +
     '<div class="form-group"><label>任务内容</label><input id="newBlockTask" placeholder="" /></div>' +
-    '<div class="form-group"><label>关联领域</label><select id="newBlockArea">' + areaOptions + '</select></div>' +
-    '<div class="form-group"><label>关联项目</label><select id="newBlockProject" onchange="updateBudgetTasksSelect(\'new\')">' + projectOptions + '</select></div>' +
+    '<div class="form-group"><label>关联领域</label><select id="newBlockArea" onchange="updateProjectsByArea(\'newBlock\')">' + areaOptions + '</select></div>' +
+    '<div class="form-group"><label>关联项目</label><select id="newBlockProject" onchange="updateBudgetTasksSelect(\'newBlock\')">' + projectOptions + '</select></div>' +
     '<div class="form-group"><label>关联事项（年度预算）</label><select id="newBlockTaskSelect"><option value="">无</option></select></div>' +
     '<div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveNewTimeBlock()">添加</button></div>';
   openModal(html);
-  window.updateBudgetTasksSelect = function(mode) {
-    var projectSelect = document.getElementById(mode + 'BlockProject');
-    var taskSelect = document.getElementById(mode + 'BlockTaskSelect');
-    if (!projectSelect || !taskSelect) return;
-    var projectId = projectSelect.value;
-    var projects = loadProjects();
-    var project = projects.find(function(p) { return p.id === projectId; });
-    var options = '<option value="">无</option>';
-    if (project && project.annualBudget && project.annualBudget.subTasks) {
-      project.annualBudget.subTasks.forEach(function(t) {
-        options += '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
-      });
-    }
-    taskSelect.innerHTML = options;
-  };
+
+  // 初始化级联（默认无选择，但提前刷新项目列表）
+  setTimeout(function() {
+    window.updateProjectsByArea('newBlock');
+    window.updateBudgetTasksSelect('newBlock');
+  }, 50);
 }
 
 function saveNewTimeBlock() {
@@ -1141,26 +1172,17 @@ function quickAddTimeBlock() {
     '<div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.8rem;">输入任务名称和预估时间，系统自动创建时间块</div>' +
     '<div class="form-group"><label>任务名称</label><input id="quickTaskName" placeholder="" /></div>' +
     '<div class="form-group"><label>预估耗时（小时）</label><input id="quickTaskHours" type="number" step="0.5" value="1" placeholder="1.5" /></div>' +
-    '<div class="form-group"><label>关联项目</label><select id="quickTaskProject" onchange="quickUpdateTasks()">' + projectOptions + '</select></div>' +
+    '<div class="form-group"><label>关联领域</label><select id="quickTaskArea" onchange="updateProjectsByArea(\'quickTask\')">' + areaOptions + '</select></div>' +
+    '<div class="form-group"><label>关联项目</label><select id="quickTaskProject" onchange="updateBudgetTasksSelect(\'quickTask\')">' + projectOptions + '</select></div>' +
     '<div class="form-group"><label>关联事项</label><select id="quickTaskSelect"><option value="">无</option></select></div>' +
-    '<div class="form-group"><label>关联领域</label><select id="quickTaskArea">' + areaOptions + '</select></div>' +
     '<div class="actions"><button class="secondary" onclick="closeModal()">取消</button><button onclick="saveQuickTimeBlock()">✅ 添加</button></div>';
   openModal(html);
-  window.quickUpdateTasks = function() {
-    var projectSelect = document.getElementById('quickTaskProject');
-    var taskSelect = document.getElementById('quickTaskSelect');
-    if (!projectSelect || !taskSelect) return;
-    var projectId = projectSelect.value;
-    var projects = loadProjects();
-    var project = projects.find(function(p) { return p.id === projectId; });
-    var options = '<option value="">无</option>';
-    if (project && project.annualBudget && project.annualBudget.subTasks) {
-      project.annualBudget.subTasks.forEach(function(t) {
-        options += '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
-      });
-    }
-    taskSelect.innerHTML = options;
-  };
+
+  // 初始化级联
+  setTimeout(function() {
+    window.updateProjectsByArea('quickTask');
+    window.updateBudgetTasksSelect('quickTask');
+  }, 50);
 }
 
 function saveQuickTimeBlock() {
@@ -1326,8 +1348,8 @@ function renderPomodoroView() {
         '<input id="pomodoroTaskName" placeholder="📝 正在做什么..." value="" />' +
       '</div>' +
       '<div class="pomodoro-selects" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;">' +
-        '<div class="form-group" style="margin:0;"><label>关联领域</label><select id="pomodoroArea">' + areaOptions + '</select></div>' +
-        '<div class="form-group" style="margin:0;"><label>关联项目</label><select id="pomodoroProject" onchange="pomodoroUpdateTaskOptions()">' + projectOptions + '</select></div>' +
+        '<div class="form-group" style="margin:0;"><label>关联领域</label><select id="pomodoroArea" onchange="updateProjectsByArea(\'pomodoro\')">' + areaOptions + '</select></div>' +
+        '<div class="form-group" style="margin:0;"><label>关联项目</label><select id="pomodoroProject" onchange="updateBudgetTasksSelect(\'pomodoro\')">' + projectOptions + '</select></div>' +
         '<div class="form-group" style="margin:0;"><label>关联事项</label><select id="pomodoroTaskSelect"><option value="">无</option></select></div>' +
       '</div>' +
       '<div class="pomodoro-controls">' +
@@ -1342,18 +1364,23 @@ function renderPomodoroView() {
       '</div>' +
     '</div>';
 
-  
-// ✅ 1. 先恢复项目下拉框的值
-var projectSelect = document.getElementById('pomodoroProject');
-if (projectSelect && formValues.projectId) {
-    projectSelect.value = formValues.projectId;
-}
+  // 恢复之前保存的表单值并触发级联
+  setTimeout(function() {
+    var areaSel = document.getElementById('pomodoroArea');
+    var projSel = document.getElementById('pomodoroProject');
+    var taskSel = document.getElementById('pomodoroTaskSelect');
 
-// ✅ 2. 手动触发任务选项更新（根据当前项目）
-pomodoroUpdateTaskOptions();
+    if (areaSel && formValues.areaId) areaSel.value = formValues.areaId;
+    window.updateProjectsByArea('pomodoro');   // 过滤项目列表
 
-// ✅ 3. 再恢复所有表单值（包括任务选择）
-restorePomodoroForm(formValues);
+    if (projSel && formValues.projectId) projSel.value = formValues.projectId;
+    window.updateBudgetTasksSelect('pomodoro'); // 过滤事项列表
+
+    if (taskSel && formValues.taskId) taskSel.value = formValues.taskId;
+    // 恢复任务名称
+    var taskNameInput = document.getElementById('pomodoroTaskName');
+    if (taskNameInput) taskNameInput.value = formValues.taskName;
+  }, 50);
 
   // 恢复当前倒计时选择
   if (pomodoroMode === 'countdown') {
@@ -1390,22 +1417,6 @@ function updatePomodoroTarget() {
     pomodoroTargetSeconds = parseInt(select.value) * 60;
   }
   updatePomodoroDisplay();
-}
-
-function pomodoroUpdateTaskOptions() {
-  var projectSelect = document.getElementById('pomodoroProject');
-  var taskSelect = document.getElementById('pomodoroTaskSelect');
-  if (!projectSelect || !taskSelect) return;
-  var projectId = projectSelect.value;
-  var projects = loadProjects();
-  var project = projects.find(function(p) { return p.id === projectId; });
-  var options = '<option value="">无</option>';
-  if (project && project.annualBudget && project.annualBudget.subTasks) {
-    project.annualBudget.subTasks.forEach(function(t) {
-      options += '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
-    });
-  }
-  taskSelect.innerHTML = options;
 }
 
 function formatPomodoroTime(seconds) {
@@ -2642,25 +2653,6 @@ function updateProjectStatus(projectId, newStatus) {
   renderAreaOverview();
   showToast('✅ 状态已更新为：' + newStatus);
 }
-// function changeProjectStatus(projectId) {
-//   var project = getProject(projectId);
-//   if (!project) return;
-//   var statuses = ['未开始', '进行中', '暂停', '已完成'];
-//   var nextStatus = statuses[(statuses.indexOf(project.status) + 1) % statuses.length] || '进行中';
-//   if (!confirm('将项目「' + project.title + '」状态从「' + project.status + '」改为「' + nextStatus + '」？')) return;
-//   project.status = nextStatus;
-//   var projects = loadProjects();
-//   for (var i = 0; i < projects.length; i++) {
-//     if (projects[i].id === projectId) {
-//       projects[i] = project;
-//       break;
-//     }
-//   }
-//   saveProjects(projects);
-//   renderPlanning();
-//   renderTodayTimeBlocks();
-//   renderAreaOverview();
-// }
 
 // ============================================================
 // 资源（保留原样）

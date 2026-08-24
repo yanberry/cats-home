@@ -1249,7 +1249,7 @@ function regenerateTodayPlan() {
 }
 
 // ============================================================
-// 🍅 番茄钟
+// 🍅 番茄钟 (修复后台计时停止问题)
 // ============================================================
 let pomodoroTimer = null;
 let pomodoroMode = 'countdown';
@@ -1257,6 +1257,7 @@ let pomodoroTargetSeconds = 25 * 60;
 let pomodoroElapsedSeconds = 0;
 let pomodoroRunning = false;
 let pomodoroSessionStart = null;
+let pomodoroStartTimestamp = null;   // 记录开始（或恢复）时的真实时间戳
 
 function switchTodayView(view) {
   localStorage.setItem('pair_today_view', view);
@@ -1439,15 +1440,27 @@ function updatePomodoroDisplay() {
 function startPomodoro() {
   if (pomodoroRunning) return;
   if (!pomodoroSessionStart) pomodoroSessionStart = new Date();
+
+  // 如果还没记录起始时间戳，则根据已消耗秒数计算起始时间戳
+  if (pomodoroStartTimestamp === null) {
+    pomodoroStartTimestamp = Date.now() - pomodoroElapsedSeconds * 1000;
+  }
+
   pomodoroRunning = true;
   renderPomodoroView();
+
+  if (pomodoroTimer) clearInterval(pomodoroTimer);
   pomodoroTimer = setInterval(function() {
-    pomodoroElapsedSeconds++;
+    const now = Date.now();
+    const elapsed = Math.floor((now - pomodoroStartTimestamp) / 1000);
+    pomodoroElapsedSeconds = elapsed;
+
     updatePomodoroDisplay();
+
     if (pomodoroMode === 'countdown' && pomodoroElapsedSeconds >= pomodoroTargetSeconds) {
       finishPomodoro(true);
     }
-  }, 1000);
+  }, 200);  // 200ms 刷新一次，用户感知更流畅
 }
 
 function pausePomodoro() {
@@ -1464,6 +1477,7 @@ function resetPomodoro() {
   pomodoroTimer = null;
   pomodoroElapsedSeconds = 0;
   pomodoroSessionStart = null;
+  pomodoroStartTimestamp = null;   // 清空起始时间戳
   renderPomodoroView();
   updatePomodoroDisplay();
 }
@@ -3750,7 +3764,7 @@ async function initialize() {
   renderWeekPlan();
   renderYearPlan();
   updateCurrentTime();               // 立即显示
-setInterval(updateCurrentTime, 10000); // 每10秒刷新一次
+  setInterval(updateCurrentTime, 10000); // 每10秒刷新一次
   setInterval(function() {
     renderYearlyTime();
     renderWeekPlan();
